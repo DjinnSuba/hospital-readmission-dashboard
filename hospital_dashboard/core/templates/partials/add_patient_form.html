@@ -1,0 +1,6 @@
+<form id="add-patient-form" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Save</button>
+  </form>
+  

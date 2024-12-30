@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Patient List</h1>
+
+<!-- Add Patient Button -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPatientModal">
+  Add Patient
+</button>
+
+<!-- Add Patient Button -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAdmissionModal">
+    Add Admission
+</button>
+
+<!-- Modal structure for Add Patient -->
+<div class="modal fade" id="addPatientModal" tabindex="-1" aria-labelledby="addPatientModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addPatientModalLabel">Add Patient</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="modal-patient-form-content">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal structure for Add Admission -->
+  <div class="modal fade" id="addAdmissionModal" tabindex="-1" aria-labelledby="addAdmissionModal" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addAdmissionModal">Add Admission</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="modal-admission-form-content">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+<!-- Table to display the patients -->
+<table class="table table-bordered mt-4">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Name</th>
+      <th>Sex</th>
+      <th>Birthdate</th>
+      <th>Address</th>
+      <th>Contact Number</th>
+      <th>Email</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for patient in patients %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ patient.name }}</td>
+      <td>{{ patient.sex }}</td>
+      <td>{{ patient.birthdate }}</td>
+      <td>{{ patient.address }}</td>
+      <td>{{ patient.contact_number }}</td>
+      <td>{{ patient.email }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Add Patient Modal
+  const patientModal = document.getElementById('addPatientModal');
+  const patientModalFormContent = document.getElementById('modal-patient-form-content');
+
+  patientModal.addEventListener('show.bs.modal', function () {
+    fetch("{% url 'add_patient' %}")
+      .then(response => response.text())
+      .then(html => {
+        patientModalFormContent.innerHTML = html;
+        addPatientFormSubmissionListener();
+      });
+  });
+
+  function addPatientFormSubmissionListener() {
+    const form = document.getElementById('add-patient-form');
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const formData = new FormData(form);
+
+      fetch("{% url 'add_patient' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Patient added successfully!');
+            location.reload();
+          } else {
+            alert('Failed to add patient.');
+          }
+        });
+    });
+  }
+
+  // Add Admission Modal
+  const admissionModal = document.getElementById('addAdmissionModal');
+  const admissionModalFormContent = document.getElementById('modal-admission-form-content');
+
+  admissionModal.addEventListener('show.bs.modal', function () {
+    fetch("{% url 'add_admission' %}")
+      .then(response => response.text())
+      .then(html => {
+        admissionModalFormContent.innerHTML = html;
+        addAdmissionFormSubmissionListener();
+      });
+  });
+
+  function addAdmissionFormSubmissionListener() {
+    const form = document.getElementById('add-admission-form');
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const formData = new FormData(form);
+
+      fetch("{% url 'add_admission' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Admission added successfully!');
+            location.reload();
+          } else {
+            alert('Failed to add admission.');
+          }
+        });
+    });
+  }
+});
+
+</script>
+
+{% endblock %}

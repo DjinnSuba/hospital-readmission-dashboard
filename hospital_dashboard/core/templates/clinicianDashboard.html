@@ -1,0 +1,7 @@
+<h1>Welcome, Clinician!</h1>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Create Admission</button>
+    </form>
+<a href="{% url 'logout' %}">Logout</a>
