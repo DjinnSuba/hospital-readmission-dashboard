@@ -3,13 +3,249 @@
 <head>
     <title>My Django App</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        img{
+            width: 65px;
+            height: auto;
+            margin-left: 25px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+
+        .navbar {
+            background-color: navy;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1;
+            display: flex;
+        }
+
+        i{
+            color: white;
+            float: right;
+            margin-right: 5px;
+        }
+
+        .sidenav {
+            height: 100vh;
+            width: 250px; 
+            position: fixed; 
+            left: 0;
+            background-color: white; 
+            padding-top: 5%;
+            border: 1px solid navy;
+            padding-left: 25px;
+        }
+
+        .sidenav a {
+            padding: 10px 25px;
+            text-decoration: none;
+            font-size: 16px;
+            color: navy; 
+            display: block;
+        }
+
+        .sidenav a:hover {
+            text-decoration: underline;
+        }
+
+        label{
+            font-size: 20px;
+            font-weight: 600;
+            color: navy;
+        }
+
+        .logout{
+            color: white;
+            background-color: navy;
+            border: none;
+            padding: 10px;
+            border-radius: 20px;
+            width: 180px;
+            bottom: 200px;
+            position: absolute;
+        }
+
+        .footer {
+            background-color: navy; 
+            color: white; 
+            padding: 20px; 
+            text-align: right; 
+            position: fixed; 
+            width: 100%; 
+            bottom: 0; 
+            left: 0;
+            z-index: 1;
+        }
+
+        .table-label{
+            font-size: 16px;
+            font-weight: 100;
+            color: gray;
+        }
+
+        input, select{
+            border-radius: 25px;
+            border: 1px solid lightgray;
+            padding: 10px;
+            padding-left: 15px;
+            width: 100%;
+        }
+
+        table {
+            margin-left: 150px;
+            border-collapse: collapse; 
+            width: 95vw; 
+        }
+
+        table tr {
+            border-top: 1px solid lightgrey; 
+            border-bottom: 1px solid lightgrey; 
+            height: 60px;
+        }
+
+        table td {
+            padding: 12px;
+            width: 100px;
+        } 
+
+        .register-new{
+            margin-top: 50px;
+            margin-left: 20%;
+            width: 15vw;
+            background-color: navy;
+            border: none;
+            border-radius: 20px;
+            padding: 10px;
+            color: white;
+        }
+
+        .register-old{
+            margin-top: 50px;
+            margin-left: 25px;
+            width: 15vw;
+            background-color: navy;
+            border: none;
+            border-radius: 20px;
+            padding: 10px;
+            color: white;
+        }
+        
+        .manage-student{
+            margin-top: 50px;
+            margin-left: 25px;
+            width: 15vw;
+            background-color: navy;
+            border: none;
+            border-radius: 20px;
+            padding: 10px;
+            color: white;
+        }
+
+        .search-input{
+            padding: 10px;
+            margin-left: 25px;
+            width: 20vw;
+            border-radius: 20px;
+            border: 1px solid gray;
+        }
+
+        a{
+            text-decoration: none;
+        }
+
+        .data{
+            color: gray;
+        }
+
+        .register_student{
+            margin-left: 20%;
+            width: 100vw;
+            padding-top: 3%;
+        }
+
+        form{
+            margin-top: 3%;
+        }
+
+        .labels{
+            width: 160px;
+        }
+
+        .inputs{
+            width: 275px;
+        }
+
+        button {
+            color: white;
+            background-color: navy;
+            border: none;
+            padding: 10px;
+            border-radius: 20px;
+            width: 180px;
+        }
+
+        button:hover{
+            background-color: rgb(1, 1, 82);
+            cursor: pointer;
+        }
+
+        
+    </style>
 </head>
 <body>
-    <div class="container">
+    <div class="navbar"> 
+        <div style="color: white; margin-left: 1%; ">
+            <h1 style="font-family: 'Times New Roman', Times, serif; font-size: 24px; margin-top: 12px;">Hospital Admission Dashboard</h1>
+        </div>        
+        <div style="color: white; float: right; margin-top: 0.5%; margin-right: 40px; display: flex; align-items: center;">
+            <i class="w3-xxlarge material-icons">person</i>
+            <p style="font-size: small; margin: 0 0 0 8px;">{{ request.user.username }}</p>
+        </div>
+    </div>    
+    <br>
+    <br>    
+    <div class="sidenav">
+
+        {% if request.user.role == 'Admin' %}
+        <label class="sidenav-label">Admin</label>
+        <a href="">Dashboard</a>
+        <a a href="">Users</a>
+        <a href="">Patients</a>
+
+        {% elif request.user.role == 'Clinician' %}
+
+        <label class="sidenav-label">Clinician</label>
+        <a href="">Dashboard</a> 
+        <a href="">Admissions</a>
+
+        {% elif request.user.role == 'Analyst' %}
+
+        <label class="sidenav-label">Analyst</label>
+        <a href="">Dashboard</a>
+    
+
+        {% endif %}
+
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button class="logout" type="submit">Log Out</button>
+        </form>        
+    </div>
+
+    <div class="container" style="padding-top: 5%; padding-left: 5%;">
         {% block content %}
         <!-- Content from child templates will go here -->
         {% endblock %}
+    </div>
+
+    <div class="footer">
+        2024
     </div>
 </body>
 </html>
