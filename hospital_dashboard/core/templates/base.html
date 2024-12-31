@@ -98,9 +98,8 @@
         }
 
         table {
-            margin-left: 150px;
             border-collapse: collapse; 
-            width: 95vw; 
+            width: 80vw; 
         }
 
         table tr {
@@ -150,9 +149,10 @@
         .search-input{
             padding: 10px;
             margin-left: 25px;
-            width: 20vw;
+            width: 12vw;
             border-radius: 20px;
             border: 1px solid gray;
+            vertical-align: middle;
         }
 
         a{
@@ -167,10 +167,6 @@
             margin-left: 20%;
             width: 100vw;
             padding-top: 3%;
-        }
-
-        form{
-            margin-top: 3%;
         }
 
         .labels{
@@ -219,6 +215,64 @@
             color: inherit;
             cursor: pointer;
         }
+
+        .table-label{
+            font-weight: 100;
+            font-size: 16px;
+            color: gray;
+        }
+
+        /* table {
+            margin-left: 250px;
+            border-collapse: collapse; 
+            width: 80vw; 
+        } */
+
+        table tr {
+            border-top: 1px solid lightgrey; 
+            border-bottom: 1px solid lightgrey; 
+        }
+
+        table tr:hover {
+            background-color: lightgrey !important;
+        }
+
+
+        table td {
+            padding: 12px;
+            width: 100px;
+        } 
+
+        table thead {
+            background-color: white !important; 
+            font-weight: bold;
+            text-align: center !important;
+        }
+
+        .sortable td {
+            padding: 12px;
+            margin: -10px;
+            background-color: white !important;
+            text-align: center !important;
+            color: navy;
+        }
+
+        .sortable th {
+            background-color: white !important; 
+            font-weight: bold !important;
+            text-align: center !important;
+            color: navy !important;
+        } 
+
+        .sortable tr:hover {
+            background-color: lightgrey !important;
+        }
+
+        .data {
+            color: gray;
+        }
+
+        
     </style>
 
     <script>
@@ -234,6 +288,9 @@
             setTimeout(() => alertBox.remove(), 5000);
         }
     </script>
+
+    <link href="https://cdn.jsdelivr.net/gh/tofsjonas/sortable@latest/sortable.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/gh/tofsjonas/sortable@latest/sortable.min.js"></script>
 </head>
 <body>
     {% if messages %}
@@ -266,8 +323,8 @@
         {% elif request.user.role == 'Clinician' %}
 
         <label class="sidenav-label">Clinician</label>
-        <a href="">Dashboard</a> 
-        <a href="">Admissions</a>
+        <a href="{% url 'clinician_dashboard' %}">Dashboard</a> 
+        <a href="{% url 'admissions' %}">Admissions</a>
 
         {% elif request.user.role == 'Analyst' %}
 

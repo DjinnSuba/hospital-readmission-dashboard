@@ -4,10 +4,12 @@ from django.db import models
 class Account(AbstractUser):
     ADMIN = 'Admin'
     CLINICIAN = 'Clinician'
+    ANALYST = 'Analyst'
 
     ROLE_CHOICES = [
         (ADMIN, 'Admin'),
         (CLINICIAN, 'Clinician'),
+        (ANALYST, 'Analyst'),
     ]
 
     username = models.CharField(max_length=150, unique=True)

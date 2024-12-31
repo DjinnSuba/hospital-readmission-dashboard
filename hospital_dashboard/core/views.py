@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from .forms import UserRegisterForm, UserLoginForm, AdmissionRecordEntry, PatientRecordEntry
-from .models import Patient
+from .models import Admission, Patient
 
 def register(request):
     if request.method == 'POST':
@@ -68,6 +68,14 @@ def sign_out(request):
 def patient_list(request):
     patients = Patient.objects.all()  # Retrieve all patients
     return render(request, 'patient_list.html', {'patients': patients})
+
+@login_required(login_url="/login")
+def admissions(request):
+    context={}
+    user_id = request.user.id
+    context['admissions'] = Admission.objects.filter(clinician=user_id)  # Retrieve all patients
+    return render(request, 'admissions.html', context)
+
 
 def add_patient(request):
     if request.method == 'POST':
