@@ -27,11 +27,13 @@ def login_view(request):
                 return redirect('admin_dashboard')
             elif user.role == 'Clinician':
                 return redirect('clinician_dashboard')
+        else:
+            messages.error(request, "Invalid username or password. Please try again.")
     else:
         form = UserLoginForm()
     return render(request, 'login.html', {'form': form})
 
-@login_required
+@login_required(login_url="/login")
 def admin_dashboard(request):
     if request.method == 'POST':
         form = PatientRecordEntry(request.POST)
@@ -43,7 +45,7 @@ def admin_dashboard(request):
         form = PatientRecordEntry()
     return render(request, 'adminDashboard.html', {'form': form})
 
-@login_required
+@login_required(login_url="/login")
 def clinician_dashboard(request):
     if request.method == 'POST':
         form = AdmissionRecordEntry(request.POST)
@@ -55,12 +57,12 @@ def clinician_dashboard(request):
         form = AdmissionRecordEntry()
     return render(request, 'clinicianDashboard.html', {'form': form})
 
-@login_required()
+@login_required(login_url="/login")
 def sign_out(request):
     request.session.flush()
     return redirect('login')
 
-@login_required
+@login_required(login_url="/login")
 def patient_list(request):
     patients = Patient.objects.all()  # Retrieve all patients
     return render(request, 'patient_list.html', {'patients': patients})

@@ -1,5 +1,152 @@
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Register</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+    <title>Hospital Admissions Register</title>
+</head>
+<style>
+        img{
+            width: 65px;
+            height: auto;
+            margin-left: 25px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+
+        i{
+            color: white;
+            float: right;
+            margin-right: 25px;
+        }
+        
+
+        .table-label{
+            font-size: 16px;
+            color: gray;
+        }
+
+        input, select{
+            border-radius: 25px;
+            border: 1px solid lightgray;
+            padding: 10px;
+            padding-left: 15px;
+            width: 100%;
+        }
+
+        button, .save-input{
+            color: white;
+            background-color: navy;
+            border: none;
+            padding: 10px;
+            border-radius: 20px;
+            width: 180px;
+        }
+
+        .footer {
+            background-color: navy; 
+            color: white; 
+            padding: 20px; 
+            text-align: right; 
+            position: fixed; 
+            width: 100%; 
+            bottom: 0; 
+        }
+
+        .register-profile{
+            margin-left: 15%;
+            width: 100vw;
+            padding-top: 5%;
+        }
+
+        form{
+            margin-top: 3%;
+        }
+
+        .labels{
+            width: 170px;
+        }
+
+        .inputs{
+            width: 310px;
+        }
+
+        tr{
+            height: 60px;
+        }
+
+        .save-btn {
+            background-color: rgb(0, 85, 0);
+            color: white;
+            width: 180px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .save-btn:hover {
+            background-color: #004225;
+        }
+
+        button:hover{
+            background-color: rgb(1, 1, 82);
+            cursor: pointer;
+        }
+</style>
+<body> 
+
+    <div class="register-profile">
+        <form method="POST" action="{% url 'register' %}">
+            {% csrf_token %}
+            <div style="width: 90vw; padding-left: 15px; height: 80vh;">
+                <i class="w3-jumbo material-icons" style="margin-left: 50px; float: left; margin-top: 3%; margin-right: 100px; color: gray; border: 2px solid gray; border-radius: 100%; transform: scale(2.5);">person</i>
+                <table style="padding-top: 30px; width: 55vw;">
+                    <tr>
+                        <td style="width: 5vw;"><label class="table-label" for="username">Username:</label></td>
+                        <td style="width: 70%;">{{ form.username }}</td>                        
+                        <td style="width: 150px; padding-left: 6.5%;"><input class="save-btn" type="submit" value="Save" ></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 5vw;"><label class="table-label" for="staff_id">Role:</label></td>
+                        <td style="width: 70%;">{{ form.role }}</td>
+                        <td style="width: 150px; padding-left: 6.5%;"><button type="button"><a href="admin_dashboard/" style="text-decoration:none">Back</a></button></td>
+                    </tr>
+                </table>
+                <table style="width: 70vw; padding-top: 2%; margin-left: 30px;">
+                    <tr>
+                        <td class="labels"><label class="table-label" for="sex">Email:</label></td>
+                        <td class="inputs" style="width: 83%;">{{ form.email }}</td>
+                    </tr>
+                </table>
+                <table style="width: 70vw; margin-left: 30px;">
+                    <tr>
+                        <td class="labels"><label class="table-label" for="password">Password:</label></td>
+                        <td class="inputs">{{ form.password1 }}</td>
+                        <td class="labels" style="padding-left: 30px; width: 190px;"> <label class="table-label" for="reenterPass">Re-enter Password:</label></td>
+                        <td class="inputs">{{ form.password2 }}</td>
+                    </tr>
+                </table>
+                <div style="margin-left: 2%; color: gray;">
+                    <ul style="padding-left: 0; margin-left: 2%;">
+                        <li>The password can’t be too similar to your other personal information. The password must contain at least 8 characters.</li>
+                        <li>The password cannot be a commonly used password. The password cannot be entirely numeric.</li>
+                    </ul>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% if message %}
+        <script> alert('{{ message }}'); </script>
+    {% endif %}
+
+    
+    
+    <div class="footer">
+        2024
+    </div>
+</body>
+
+</html>

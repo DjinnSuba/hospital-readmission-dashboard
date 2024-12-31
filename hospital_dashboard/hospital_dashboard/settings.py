@@ -31,7 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'core',
+    'core.apps.CoreConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -79,7 +79,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'hospital-dashboard',  # Your PostgreSQL database name
         'USER': 'postgres',       # Your PostgreSQL username
-        'PASSWORD': 'password',   # Your PostgreSQL password
+        'PASSWORD': 'HelpMeStudyPlease',   # Your PostgreSQL password
         'HOST': 'localhost',
         'PORT': '5432',                # Default PostgreSQL port
     }
@@ -121,7 +121,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_DIRS = [BASE_DIR / 'core/static']
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
