@@ -13,6 +13,8 @@ def register(request):
             user = form.save()
             messages.success(request, f"Account created for {user.username}!")
             return redirect('login')
+        else:
+            messages.error(request, "Invalid input. Please try again.")
     else:
         form = UserRegisterForm()
     return render(request, 'register.html', {'form': form})

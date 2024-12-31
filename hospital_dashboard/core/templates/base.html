@@ -195,10 +195,55 @@
             cursor: pointer;
         }
 
-        
+        .alert {
+            position: fixed;
+            top: 20%;
+            right: 40%;
+            background-color: #f8d7da;
+            color: #842029;
+            padding: 10px 20px;
+            border: 1px solid #f5c2c7;
+            border-radius: 5px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+        .alert.success { background-color: #d1e7dd; color: #0f5132; border-color: #badbcc; }
+        .alert.info { background-color: #cff4fc; color: #055160; border-color: #b6effb; }
+        .alert button {
+            background: none;
+            border: none;
+            font-size: 16px;
+            margin-left: 20px;
+            color: inherit;
+            cursor: pointer;
+        }
     </style>
+
+    <script>
+        // Function to display an alert with the message content
+        function showAlert(message, tag) {
+            const alertBox = document.createElement('div');
+            alertBox.className = `alert ${tag}`;
+            alertBox.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()">✖</button>
+            `;
+            document.body.appendChild(alertBox);
+            setTimeout(() => alertBox.remove(), 5000);
+        }
+    </script>
 </head>
 <body>
+    {% if messages %}
+        {% for message in messages %}
+        <script>
+        showAlert("{{ message|escapejs }}", "{{ message.tags }}");
+        </script>
+        {% endfor %}
+    {% endif %}
+
     <div class="navbar"> 
         <div style="color: white; margin-left: 1%; ">
             <h1 style="font-family: 'Times New Roman', Times, serif; font-size: 24px; margin-top: 12px;">Hospital Admission Dashboard</h1>
