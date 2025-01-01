@@ -26,6 +26,15 @@
             margin-bottom: 8px;
         }
 
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; 
+            display: flex;
+            flex-direction: column;
+        }
+
         .navbar {
             background-color: navy;
             position: fixed;
@@ -34,6 +43,9 @@
             width: 100%;
             z-index: 1;
             display: flex;
+            align-items: center;
+            height: 60px; 
+            box-sizing: border-box; 
         }
 
         i{
@@ -43,14 +55,17 @@
         }
 
         .sidenav {
-            height: 100vh;
-            width: 250px; 
-            position: fixed; 
+            height: calc(100vh - 120px); /* Subtract header and footer height */
+            width: 250px;
+            position: fixed;
+            top: 60px; /* Below the navbar */
             left: 0;
-            background-color: white; 
+            background-color: white;
             padding-top: 5%;
             border: 1px solid navy;
             padding-left: 25px;
+            overflow-y: auto; /* Enable vertical scrolling */
+            box-sizing: border-box; /* Include padding in width/height */
         }
 
         .sidenav a {
@@ -63,6 +78,16 @@
 
         .sidenav a:hover {
             text-decoration: underline;
+        }
+
+        .container {
+            flex: 1;
+            margin-left: 270px; 
+            margin-bottom: 60px; 
+            padding: 40px;
+            box-sizing: border-box; 
+            overflow-y: auto; 
+            max-width: calc(100vw - 270px);
         }
 
         label{
@@ -83,15 +108,17 @@
         }
 
         .footer {
-            background-color: navy; 
-            color: white; 
-            padding: 20px; 
-            text-align: right; 
-            position: fixed; 
-            width: 100%; 
-            bottom: 0; 
+            background-color: navy;
+            color: white;
+            padding: 20px;
+            text-align: right;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
             left: 0;
             z-index: 1;
+            height: 60px;
+            box-sizing: border-box;
         }
 
         .table-label{
@@ -109,20 +136,23 @@
         }
 
         table {
-            border-collapse: collapse; 
-            width: 80vw; 
+            border-collapse: collapse;
+            width: 80%;
+            margin: 20px auto;
+            overflow-x: auto;
         }
 
         table tr {
             border-top: 1px solid lightgrey; 
             border-bottom: 1px solid lightgrey; 
-            height: 60px;
+            height: 20px;
         }
 
-        table td {
-            padding: 12px;
-            width: 100px;
-        } 
+        table td, table th {
+            padding: 5px;
+            text-align: center;
+            border: 1px solid lightgray;
+        }
 
         .register-new{
             margin-top: 50px;
@@ -215,6 +245,9 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             font-family: Arial, sans-serif;
             font-size: 12px;
+            max-width: 90%;
+            margin: 0 auto;
+            word-wrap: break-word;
         }
         .alert.success { background-color: #d1e7dd; color: #0f5132; border-color: #badbcc; }
         .alert.info { background-color: #cff4fc; color: #055160; border-color: #b6effb; }
@@ -351,7 +384,7 @@
         </form>        
     </div>
 
-    <div class="container" style="padding-top: 5%; padding-left: 5%;">
+    <div class="container">
         {% block content %}
         <!-- Content from child templates will go here -->
         {% endblock %}

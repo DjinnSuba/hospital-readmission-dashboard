@@ -81,6 +81,15 @@ def dashboard(request):
     context['readmission_labels'] = ['Readmissions', 'Non-Readmissions']
     context['readmission_data'] = [readmissions_count, non_readmissions_count]
 
+    common_diseases = admissions.values('diagnosis').annotate(count=Count('id')).order_by('-count')[:10]
+    context['commonDiseases_labels'] = [entry['diagnosis'] for entry in common_diseases]
+    context['commonDiseases_data'] = [entry['count'] for entry in common_diseases]
+
+    common_treatments = admissions.values('treatment').annotate(count=Count('id')).order_by('-count')[:10]
+    context['commonTreatments_labels'] = [entry['treatment'] for entry in common_treatments]
+    context['commonTreatments_data'] = [entry['count'] for entry in common_treatments]
+
+
     # Monthly admissions for all admissions
     admissions_by_month = (
         admissions.annotate(month=TruncMonth('date'))
