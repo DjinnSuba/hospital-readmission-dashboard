@@ -2,13 +2,32 @@
 
 {% block content %}
 
-<h1>Welcome, {{ user.role }}!</h1>
+<h1></h1>
+
+<div style="width: 83vw; overflow-x: auto; max-height: 70vh; overflow-y: auto; display: flex; align-items: center; flex-wrap: wrap; flex-grow: 1;">
+    <form method="GET" action="{% url 'dashboard' %}" style="display: flex; align-items: center;"> 
+        {% csrf_token %}
+        <label style="font-size: 32px; white-space: nowrap;">{{ user.role }} Analytics Dashboard</label>
+        <input style="margin-left: 65%; width: 150px" value="{{ after }}" type="date" class="search-input" name="after">
+        <label style="margin-left: 1%; font-size: 16px;">to</label>
+        <input style="margin-left: 1%; width: 150px" value="{{ before }}" type="date" class="search-input" name="before">
+        <button style="width: 40px; margin-left: 2%; display: flex; justify-content: center;" type="submit">
+            <i class="material-icons" style="font-size: 18px; padding-left: 3px;">search</i>
+        </button>
+    </form>        
+</div>
+
+<br>
 
 <div class="chart-container">
     <canvas id="sex_PieChart"></canvas>
     <canvas id="readmission_PieChart"></canvas>
+    <canvas id="admissions_LineChart"></canvas>
 </div>
 
+<div class="chart-container">
+    <!-- next charts here -->
+</div>
 
 
 
@@ -103,6 +122,61 @@
                 padding: 20 // Adds padding around the chart
             }
         }
+    });
+</script>
+
+<!-- line chart -->
+<script>
+    // Data passed from the backend
+    const line_chart_labels = {{ line_chart_labels|safe }};
+    const all_admissions_data = {{ all_admissions_data|safe }};
+    const readmissions_data = {{ readmissions_data|safe }};
+
+    const admissions_LineChart = document.getElementById('admissions_LineChart').getContext('2d');
+    new Chart(admissions_LineChart, {
+        type: 'line',
+        data: {
+            labels: line_chart_labels,
+            datasets: [
+                {
+                    label: 'All Admissions',
+                    data: all_admissions_data,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.4,
+                },
+                {
+                    label: 'Readmissions',
+                    data: readmissions_data,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.4,
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Month',
+                    },
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Admissions Count',
+                    },
+                    beginAtZero: true,
+                },
+            },
+        },
     });
 </script>
 

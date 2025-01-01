@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
@@ -49,6 +49,29 @@ def dashboard(request):
     else:
         admissions = Admission.objects.all()
 
+    before = request.GET.get('before')
+    after = request.GET.get('after')
+
+    if before:
+        try:
+            # Convert to datetime object for validation
+            before_date = datetime.strptime(before, "%Y-%m-%d").date()
+            admissions = admissions.filter(date__lte=before_date)
+        except ValueError:
+            # Handle invalid date format
+            before_date = None
+
+    # Validate and filter by 'after' date
+    if after:
+        try:
+            after_date = datetime.strptime(after, "%Y-%m-%d").date()
+            admissions = admissions.filter(date__gte=after_date)
+        except ValueError:
+            after_date = None
+
+    context['before'] = before
+    context['after'] = after  
+
     admissions_by_sex = admissions.values('patient__sex').annotate(count=Count('id')).order_by('patient__sex')
     context['sex_labels'] = [entry['patient__sex'] for entry in admissions_by_sex]
     context['sex_data'] = [entry['count'] for entry in admissions_by_sex]
@@ -58,7 +81,34 @@ def dashboard(request):
     context['readmission_labels'] = ['Readmissions', 'Non-Readmissions']
     context['readmission_data'] = [readmissions_count, non_readmissions_count]
 
-    admissions.filter().annotate(month=TruncMonth('date')).values('month').annotate(count=Count('id')).order_by('month')
+    # Monthly admissions for all admissions
+    admissions_by_month = (
+        admissions.annotate(month=TruncMonth('date'))
+        .values('month')
+        .annotate(count=Count('id'))
+        .order_by('month')
+    )
+
+    # Monthly admissions for readmissions only
+    readmissions_by_month = (
+        admissions.filter(is_readmission=True)
+        .annotate(month=TruncMonth('date'))
+        .values('month')
+        .annotate(count=Count('id'))
+        .order_by('month')
+    )
+
+    # Prepare data for the chart
+    months = [entry['month'].strftime('%B') for entry in admissions_by_month]
+    all_admissions_data = [entry['count'] for entry in admissions_by_month]
+    readmissions_data = [
+        next((entry['count'] for entry in readmissions_by_month if entry['month'] == month), 0)
+        for month in [entry['month'] for entry in admissions_by_month]
+    ]
+
+    context['line_chart_labels'] = months
+    context['all_admissions_data'] = all_admissions_data
+    context['readmissions_data'] = readmissions_data
 
     context['user'] = user
     return render(request, 'dashboard.html', context)
