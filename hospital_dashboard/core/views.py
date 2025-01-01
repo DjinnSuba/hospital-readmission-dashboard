@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
@@ -79,9 +80,85 @@ def user_list(request):
 def admissions(request):
     context={}
     user_id = request.user.id
-    context['admissions'] = Admission.objects.filter(clinician=user_id)  # Retrieve all patients
+
+    admissions = Admission.objects.filter(clinician=user_id)
+
+    if 'name' not in request.GET:
+        name = ''
+    else:
+        name = request.GET.get('name')
+        admissions = admissions.filter(patient__name__icontains=name)
+
+    if 'diagnosis' not in request.GET:
+        diagnosis = ''
+    else:
+        diagnosis = request.GET.get('diagnosis')
+        admissions = admissions.filter(diagnosis__icontains=diagnosis)
+
+    before = request.GET.get('before')
+    #admissions = admissions.filter(date__lte=before)
+
+    after = request.GET.get('after')
+    #admissions = admissions.filter(date__gte=after)
+
+    if before:
+        try:
+            # Convert to datetime object for validation
+            before_date = datetime.strptime(before, "%Y-%m-%d").date()
+            admissions = admissions.filter(date__lte=before_date)
+        except ValueError:
+            # Handle invalid date format
+            before_date = None
+
+    # Validate and filter by 'after' date
+    if after:
+        try:
+            after_date = datetime.strptime(after, "%Y-%m-%d").date()
+            admissions = admissions.filter(date__gte=after_date)
+        except ValueError:
+            after_date = None
+
+    context['name'] = name
+    context['diagnosis'] = diagnosis
+    context['before'] = before
+    context['after'] = after        
+    context['admissions'] = admissions.order_by('-date')  # Retrieve all patients
     return render(request, 'admissions.html', context)
 
+@login_required(login_url="/login")
+def admission_patients(request):
+    context={}
+    user_id = request.user.id
+
+    patients = Patient.objects.all()
+
+    if 'name' not in request.GET:
+        name = ''
+    else:
+        name = request.GET.get('name')
+        patients = patients.filter(name__icontains=name)
+
+    if 'diagnosis' not in request.GET:
+        diagnosis = ''
+    else:
+        diagnosis = request.GET.get('diagnosis')
+        admissions = Admission.objects.filter(diagnosis__icontains=diagnosis)
+        patients = patients.filter(admissions__in=admissions).distinct()
+
+    context['name'] = name
+    context['diagnosis'] = diagnosis
+
+    context['patients'] = patients
+    return render(request, 'admissions_patients.html', context)
+
+@login_required(login_url="/login")
+def admit_patient(request, id):
+    context={}
+
+    context['patient'] = Patient.objects.get(id=id)
+    context['admissions'] = Admission.objects.filter(patient=id).order_by('-date')
+
+    return render(request, 'admit_patient.html', context)
 
 def add_patient(request):
     if request.method == 'POST':
