@@ -5,8 +5,19 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
+        .chart-container {
+            display: flex;
+            justify-content: center; /* Center the chart */
+            align-items: center;
+        }
+        canvas {
+            max-width: 400px; /* Restrict the maximum width */
+            max-height: 400px; /* Restrict the maximum height */
+        }
+
         img{
             width: 65px;
             height: auto;
@@ -316,20 +327,20 @@
 
         {% if request.user.role == 'Admin' %}
         <label class="sidenav-label">Admin</label>
-        <a href="{% url 'admin_dashboard' %}">Dashboard</a>
+        <a href="{% url 'dashboard' %}">Dashboard</a>
         <a a href="{% url 'user_list' %}">Users</a>
         <a href="{% url 'patient_list' %}">Patients</a>
 
         {% elif request.user.role == 'Clinician' %}
 
         <label class="sidenav-label">Clinician</label>
-        <a href="{% url 'clinician_dashboard' %}">Dashboard</a> 
+        <a href="{% url 'dashboard' %}">Dashboard</a> 
         <a href="{% url 'admissions' %}">Admissions</a>
 
         {% elif request.user.role == 'Analyst' %}
 
         <label class="sidenav-label">Analyst</label>
-        <a href="{% url 'admin_dashboard' %}">Dashboard</a>
+        <a href="{% url 'dashboard' %}">Dashboard</a>
     
 
         {% endif %}

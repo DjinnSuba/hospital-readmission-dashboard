@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Welcome, {{ user.role }}!</h1>
+
+<div class="chart-container">
+    <canvas id="sex_PieChart"></canvas>
+    <canvas id="readmission_PieChart"></canvas>
+</div>
+
+
+
+
+<!-- sex pie chart -->
+<script>
+    // Data passed from the backend
+    const sex_labels = {{ sex_labels|safe }};
+    const sex_data = {{ sex_data|safe }};
+
+    // Chart.js configuration
+    const sex_PieChart = document.getElementById('sex_PieChart').getContext('2d');
+    new Chart(sex_PieChart, {
+        type: 'pie',
+        data: {
+            labels: sex_labels,
+            datasets: [{
+                label: 'Admissions by Sex',
+                data: sex_data,
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(255, 99, 132, 0.2)',
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 99, 132, 1)',
+                ],
+                borderWidth: 1,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false, // Allows custom sizing
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 14, // Adjust font size
+                        }
+                    }
+                }
+            },
+            layout: {
+                padding: 20 // Adds padding around the chart
+            }
+        }
+    });
+</script>
+
+<!-- readmission pie chart -->
+<script>
+    // Data passed from the backend
+    const readmission_labels = {{ readmission_labels|safe }};
+    const readmission_data = {{ readmission_data|safe }};
+
+    console.log(readmission_labels, readmission_data);
+
+    // Chart.js configuration
+    const readmission_PieChart = document.getElementById('readmission_PieChart').getContext('2d');
+    new Chart(readmission_PieChart, {
+        type: 'pie',
+        data: {
+            labels: readmission_labels,
+            datasets: [{
+                label: 'Readmission Status',
+                data: readmission_data,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',  // Color for readmissions
+                    'rgba(54, 162, 235, 0.6)',  // Color for non-readmissions
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                ],
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false, // Allows custom sizing
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 14, // Adjust font size
+                        }
+                    }
+                }
+            },
+            layout: {
+                padding: 20 // Adds padding around the chart
+            }
+        }
+    });
+</script>
+
+{% endblock %}

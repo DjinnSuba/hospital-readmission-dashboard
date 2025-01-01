@@ -1,9 +1,12 @@
+from datetime import date
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.db.models import Count
+from django.db.models.functions import TruncMonth
 
 from .forms import UserRegisterForm, UserLoginForm, AdmissionRecordEntry, PatientRecordEntry, UserEditForm
 from .models import Admission, Patient, Account
@@ -26,15 +29,40 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            if user.role == 'Admin':
-                return redirect('admin_dashboard')
-            elif user.role == 'Clinician':
-                return redirect('clinician_dashboard')
+            return redirect('dashboard')
         else:
             messages.error(request, "Invalid username or password. Please try again.")
     else:
-        form = UserLoginForm()
+        form = UserLoginForm() 
     return render(request, 'login.html', {'form': form})
+
+@login_required(login_url="/login")
+def dashboard(request):
+    context={}
+
+    user_id = request.user.id
+    user = Account.objects.get(id=user_id)
+    role = user.role    
+
+    if role == 'Clinician':
+        admissions = Admission.objects.filter(clinician__id=user_id)
+    else:
+        admissions = Admission.objects.all()
+
+    admissions_by_sex = admissions.values('patient__sex').annotate(count=Count('id')).order_by('patient__sex')
+    context['sex_labels'] = [entry['patient__sex'] for entry in admissions_by_sex]
+    context['sex_data'] = [entry['count'] for entry in admissions_by_sex]
+
+    readmissions_count = admissions.filter(is_readmission=True).count()
+    non_readmissions_count = admissions.filter(is_readmission=False).count()
+    context['readmission_labels'] = ['Readmissions', 'Non-Readmissions']
+    context['readmission_data'] = [readmissions_count, non_readmissions_count]
+
+    admissions.filter().annotate(month=TruncMonth('date')).values('month').annotate(count=Count('id')).order_by('month')
+
+    context['user'] = user
+    return render(request, 'dashboard.html', context)
+
 
 @login_required(login_url="/login")
 def admin_dashboard(request):
@@ -60,6 +88,8 @@ def clinician_dashboard(request):
         form = AdmissionRecordEntry()
     return render(request, 'clinicianDashboard.html', {'form': form})
 
+
+
 @login_required(login_url="/login")
 def sign_out(request):
     request.session.flush()
@@ -81,7 +111,6 @@ def admissions(request):
     user_id = request.user.id
     context['admissions'] = Admission.objects.filter(clinician=user_id)  # Retrieve all patients
     return render(request, 'admissions.html', context)
-
 
 def add_patient(request):
     if request.method == 'POST':
