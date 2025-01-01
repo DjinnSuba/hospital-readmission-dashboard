@@ -317,7 +317,7 @@
         {% if request.user.role == 'Admin' %}
         <label class="sidenav-label">Admin</label>
         <a href="{% url 'admin_dashboard' %}">Dashboard</a>
-        <a a href="">Users</a>
+        <a a href="{% url 'user_list' %}">Users</a>
         <a href="{% url 'patient_list' %}">Patients</a>
 
         {% elif request.user.role == 'Clinician' %}

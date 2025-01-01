@@ -33,3 +33,7 @@ class AdmissionRecordEntry(forms.ModelForm):
             'treatment': forms.Textarea(attrs={'rows': 3}),
             'remarks': forms.Textarea(attrs={'rows': 2}),
         }
+class UserEditForm(forms.ModelForm):
+    class Meta:
+        model = Account
+        fields = ['username', 'email', 'role']

@@ -8,7 +8,11 @@ urlpatterns = [
     path('clinician_dashboard/', views.clinician_dashboard, name='clinician_dashboard'),
     path('logout', views.sign_out, name='logout'),
     path('patient-list/', views.patient_list, name='patient_list'),
+    path('user-list/', views.user_list, name='user_list'),
     path('add-patient/', views.add_patient, name='add_patient'),
     path('add-admission/', views.add_admission, name='add_admission'),
-    path('admissions/', views.admissions, name='admissions')
+    path('add-user/', views.add_user, name='add_user'),
+    path('admissions/', views.admissions, name='admissions'),
+    path('edit-user/<int:pk>/', views.edit_user, name='edit_user'),
+
 ]

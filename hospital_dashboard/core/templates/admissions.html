@@ -16,11 +16,9 @@
             <i class="material-icons" style="font-size: 18px; padding-left: 3px;">search</i>
         </button>
     </form>        
-
-    <form action="" method="post" style="display: flex; align-items: center; margin-left: 7%;">
-        {% csrf_token %}
-        <button type="submit" style="width: 7vw; font-size: 14px;">Admit Patients</button>
-    </form>   
+    <button type="button" style="width: 7vw; font-size: 14px;" data-bs-toggle="modal" data-bs-target="#addAdmissionModal">
+        Admit Patients
+    </button>
 </div>
 
 
@@ -53,6 +51,63 @@
         </tbody>
     </table>
 </div>
+  <!-- Modal structure for Add Admission -->
+  <div class="modal fade" id="addAdmissionModal" tabindex="-1" aria-labelledby="addAdmissionModal" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addAdmissionModal">Add Admission</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="modal-admission-form-content">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Add Admission Modal
+  const admissionModal = document.getElementById('addAdmissionModal');
+  const admissionModalFormContent = document.getElementById('modal-admission-form-content');
 
+  admissionModal.addEventListener('show.bs.modal', function () {
+    fetch("{% url 'add_admission' %}")
+      .then(response => response.text())
+      .then(html => {
+        admissionModalFormContent.innerHTML = html;
+        addAdmissionFormSubmissionListener();
+      });
+  });
 
+  function addAdmissionFormSubmissionListener() {
+    const form = document.getElementById('add-admission-form');
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const formData = new FormData(form);
+
+      fetch("{% url 'add_admission' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Admission added successfully!');
+            location.reload();
+          } else {
+            alert('Failed to add admission.');
+          }
+        });
+    });
+  }
+});
+
+</script>
 {% endblock %}

@@ -3,18 +3,19 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
-from .forms import UserRegisterForm, UserLoginForm, AdmissionRecordEntry, PatientRecordEntry
-from .models import Admission, Patient
+from django.shortcuts import get_object_or_404
+
+from .forms import UserRegisterForm, UserLoginForm, AdmissionRecordEntry, PatientRecordEntry, UserEditForm
+from .models import Admission, Patient, Account
 
 def register(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            messages.success(request, f"Account created for {user.username}!")
-            return redirect('login')
+            form.save()
+            return JsonResponse({'success': True, 'message': 'User registered successfully!'})
         else:
-            messages.error(request, "Invalid input. Please try again.")
+            return JsonResponse({'success': False, 'errors': form.errors})
     else:
         form = UserRegisterForm()
     return render(request, 'register.html', {'form': form})
@@ -70,6 +71,11 @@ def patient_list(request):
     return render(request, 'patient_list.html', {'patients': patients})
 
 @login_required(login_url="/login")
+def user_list(request):
+    accounts = Account.objects.all()
+    return render(request, 'user_list.html', {'accounts': accounts})
+
+@login_required(login_url="/login")
 def admissions(request):
     context={}
     user_id = request.user.id
@@ -98,3 +104,33 @@ def add_admission(request):
     else:
         form = AdmissionRecordEntry()
     return render(request, 'partials/add_admission_form.html', {'form': form})
+
+def add_user(request):
+    if request.method == 'POST':
+        form = UserRegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'success': True, 'message': 'User registered successfully!'})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors})
+    else:
+        form = UserRegisterForm()
+    return render(request, 'partials/add_user_form.html', {'form': form})
+
+@login_required(login_url="/login")
+def edit_user(request, pk):
+    try:
+        acc = Account.objects.get(pk=pk)
+    except Account.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'User not found.'}, status=404)
+
+    if request.method == 'POST':
+        form = UserEditForm(request.POST, instance=acc)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'success': True, 'message': 'User updated successfully!'})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors.get_json_data()}, status=400)
+    else:
+        form = UserEditForm(instance=acc)
+    return render(request, 'partials/edit_user_form.html', {'form': form})
