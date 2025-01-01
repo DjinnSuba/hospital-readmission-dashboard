@@ -2,30 +2,36 @@
 
 {% block content %}
 
-<form method="POST" action=""> {% csrf_token %}
-    <div style="display:flex; align-items: center;">
 
-        <label style="font-size: 32px;">Patient Admissions</label>
-        <input style="margin-left: 3%;" value='{{ name }}' type="text" class="search-input"  name='name' placeholder="Search by name">
-        <input style="margin-left: 1%;" value='{{ diagnosis }}' type="text" class="search-input"  name='diagnosis' placeholder="Search by diagnosis">
-        
-        <input style="margin-left: 1%; width: 150px" value='{{ before }}' type="date" class="search-input"  name='before'>
+<div style="width: 83vw; overflow-x: auto; max-height: 70vh; overflow-y: auto; display: flex; align-items: center; flex-wrap: wrap; flex-grow: 1;">
+    <form method="POST" action="" style="display: flex; align-items: center;"> 
+        {% csrf_token %}
+        <label style="font-size: 32px; white-space: nowrap;">Patient Admissions</label>
+        <input style="margin-left: 3%;" value="{{ name }}" type="text" class="search-input" name="name" placeholder="Search by name">
+        <input style="margin-left: 1%;" value="{{ diagnosis }}" type="text" class="search-input" name="diagnosis" placeholder="Search by diagnosis">
+        <input style="margin-left: 1%; width: 150px" value="{{ before }}" type="date" class="search-input" name="before">
         <label style="margin-left: .5%; font-size: 16px;">to</label>
-        <input style="margin-left: .5%; width: 150px" value='{{ after }}' type="date" class="search-input"  name='after'>
-        
-        <button style="width: 40px; margin-left: 1%; display: flex; justify-content: center;" type="submit">
+        <input style="margin-left: .5%; width: 150px" value="{{ after }}" type="date" class="search-input" name="after">
+        <button style="width: 40px; margin-left: 2%; display: flex; justify-content: center;" type="submit">
             <i class="material-icons" style="font-size: 18px; padding-left: 3px;">search</i>
         </button>
-        
-    </div>
-</form>
+    </form>        
+
+    <form action="" method="post" style="display: flex; align-items: center; margin-left: 7%;">
+        {% csrf_token %}
+        <button type="submit" style="width: 7vw; font-size: 14px;">Admit Patients</button>
+    </form>   
+</div>
+
+
+
 
 <br>
 
 
-<div style="width: 85vw; overflow-x: auto; max-height: 70vh; overflow-y: auto;">
-    <table class="sortable" style="border-collapse: collapse; width: 80vw;"> 
-        <thead >
+<div style="width: 83vw; overflow-x: auto; max-height: 70vh; overflow-y: auto;">
+    <table style="border-collapse: collapse; width: 80vw;"> 
+        <thead>
             <tr>
                 <th style="padding-left: 30px;">Name</th>
                 <th>Diagnosis</th>
@@ -36,12 +42,12 @@
         </thead>
         <tbody>
         {% for x in admissions %}
-            <tr class="userRow">
-                <td class="data" style="padding-left: 30px;"><em>{{ x.patient.name }}</em></td>
-                <td class="data"><em>{{ x.diagnosis }}</em></td>
-                <td class="data"><em>{{ x.treatment }}</em></td>
-                <td class="data"><em>{{ x.date }}</em></td>
-                <td class="data" style="padding-right: 50px;">{% if x.is_readmission %}<em style="color: green;">Yes {% else %}<em style="color: maroon;">No{% endif %}</em></td>
+            <tr>
+                <td style="padding-left: 30px;"><em>{{ x.patient.name }}</em></td>
+                <td><em>{{ x.diagnosis }}</em></td>
+                <td><em>{{ x.treatment }}</em></td>
+                <td><em>{{ x.date }}</em></td>
+                <td style="padding-right: 50px;">{% if x.is_readmission %}<em style="color: green;">Yes {% else %}<em style="color: maroon;">No{% endif %}</em></td>
             </tr>
         {% endfor %}
         </tbody>

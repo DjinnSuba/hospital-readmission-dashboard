@@ -233,14 +233,14 @@
             border-bottom: 1px solid lightgrey; 
         }
 
-        table tr:hover {
+        tbody tr:hover {
             background-color: lightgrey !important;
         }
 
 
         table td {
             padding: 12px;
-            width: 100px;
+            text-align: center;
         } 
 
         table thead {
@@ -329,7 +329,7 @@
         {% elif request.user.role == 'Analyst' %}
 
         <label class="sidenav-label">Analyst</label>
-        <a href="">Dashboard</a>
+        <a href="{% url 'admin_dashboard' %}">Dashboard</a>
     
 
         {% endif %}
