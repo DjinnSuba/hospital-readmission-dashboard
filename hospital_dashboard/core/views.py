@@ -155,8 +155,17 @@ def admission_patients(request):
 def admit_patient(request, id):
     context={}
 
+    admissions = Admission.objects.filter(patient=id)
+
+    if 'diagnosis' not in request.GET:
+        diagnosis = ''
+    else:
+        diagnosis = request.GET.get('diagnosis')
+        admissions = admissions.filter(diagnosis__icontains=diagnosis)
+
     context['patient'] = Patient.objects.get(id=id)
-    context['admissions'] = Admission.objects.filter(patient=id).order_by('-date')
+    context['admissions'] = admissions.order_by('-date')
+    context['diagnosis'] = diagnosis
 
     return render(request, 'admit_patient.html', context)
 
