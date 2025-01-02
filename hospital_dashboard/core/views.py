@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
-from .forms import UserRegisterForm, UserLoginForm, AdmissionRecordEntry, PatientRecordEntry, UserEditForm
+from .forms import UserRegisterForm, UserLoginForm, AdmissionRecordEntry, PatientRecordEntry, UserEditForm, PatientAdmissionRecordEntry
 from .models import Admission, Patient, Account
 
 def register(request):
@@ -220,3 +220,45 @@ def edit_user(request, pk):
     else:
         form = UserEditForm(instance=acc)
     return render(request, 'partials/edit_user_form.html', {'form': form})
+
+@login_required
+def add_patient_admission(request, pk):
+    patient = get_object_or_404(Patient, id=pk)
+    clinician = request.user
+
+    if request.method == 'POST':
+        form = PatientAdmissionRecordEntry(request.POST)
+        if form.is_valid():
+            admission = form.save(commit=False)
+            admission.patient = patient
+            admission.clinician = clinician
+            admission.save()
+            return JsonResponse({'success': True, 'message': 'Admission created successfully.'})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors})
+    else:
+        # Pre-fill the form but exclude clinician and patient fields from the user input
+        form = PatientAdmissionRecordEntry()
+
+    return render(request, 'partials/add_patient_admission_form.html', {
+        'form': form,
+        'patient': patient,
+    })
+@login_required
+def edit_admission(request, pk):
+    admission = get_object_or_404(Admission, id=pk)
+
+    if request.method == 'POST':
+        form = PatientAdmissionRecordEntry(request.POST, instance=admission)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'success': True, 'message': 'Admission updated successfully.'})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors})
+    else:
+        form = PatientAdmissionRecordEntry(instance=admission)
+
+    return render(request, 'partials/edit_admission_form.html', {
+        'form': form,
+        'admission': admission,
+    })
