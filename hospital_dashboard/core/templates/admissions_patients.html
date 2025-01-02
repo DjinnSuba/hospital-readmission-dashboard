@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<div style="width: 83vw; overflow-x: auto; max-height: 70vh; overflow-y: auto; display: flex; align-items: center; flex-wrap: wrap; flex-grow: 1;">
+    <form method="GET" action="" style="display: flex; align-items: center;"> 
+        {% csrf_token %}
+        <label style="font-size: 32px; white-space: nowrap;">Select Patient to Admit</label>
+        <input style="margin-left: 3%;" value="{{ name }}" type="text" class="search-input" name="name" placeholder="Search by name">
+        <input style="margin-left: 1%;" value="{{ diagnosis }}" type="text" class="search-input" name="diagnosis" placeholder="Search by diagnosis">
+
+        <button style="width: 40px; margin-left: 2%; display: flex; justify-content: center;" type="submit">
+            <i class="material-icons" style="font-size: 18px; padding-left: 3px;">search</i>
+        </button>
+    </form>
+    <div style="margin-left: 4%;">         
+      <button type="button" 
+              style="width: 7vw; font-size: 14px;"
+              data-url="{% url 'add_patient' %}" 
+              data-bs-toggle="modal" 
+              data-bs-target="#addPatientModal" >
+          New Patient
+      </button>
+    </div>
+</div>
+
+<br>
+
+<div style="width: 80vw; overflow-x: auto; max-height: 70vh; overflow-y: auto;">
+    <table style="border-collapse: collapse; width: 80vw;"> 
+        <thead>
+            <tr>
+                <th style="padding-left: 30px;">Name</th>
+                <th>Sex</th>
+                <th>Address</th>
+                <th>Contact Number</th>
+                <th style="padding-right: 50px;">Email</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for x in patients %}
+            <tr onclick="window.location.href='/admissions/patients/{{ x.id }}/'">
+                <td style="padding-left: 30px;"><em>{{ x.name }}</em></td>
+                <td><em>{{ x.sex }}</em></td>
+                <td><em>{{ x.address }}</em></td>
+                <td><em>{{ x.contact_number }}</em></td>
+                <td style="padding-right: 50px;"><em>{{ x.email }}</em></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+  <!-- Modal structure for Add Admission -->
+  <div class="modal fade" id="addPatientModal" tabindex="-1" aria-labelledby="addPatientModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addPatientModalLabel">Add Patient</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="modal-patient-form-content">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Add Patient Modal
+    const patientModal = document.getElementById('addPatientModal');
+    const patientModalFormContent = document.getElementById('modal-patient-form-content');
+
+    patientModal.addEventListener('show.bs.modal', function () {
+      fetch("{% url 'add_patient' %}")
+        .then(response => response.text())
+        .then(html => {
+          patientModalFormContent.innerHTML = html;
+          addPatientFormSubmissionListener();
+        });
+    });
+
+    function addPatientFormSubmissionListener() {
+      const form = document.getElementById('add-patient-form');
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const formData = new FormData(form);
+
+        fetch("{% url 'add_patient' %}", {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              alert('Patient added successfully!');
+              location.reload();
+            } else {
+              alert('Failed to add patient.');
+            }
+          });
+      });
+    }
+  });
+
+</script>
+{% endblock %}

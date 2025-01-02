@@ -1,0 +1,321 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div style="width: 75vw; overflow-x: auto; max-height: 70vh; overflow-y: auto; display: flex; align-items: center; flex-wrap: wrap; flex-grow: 1;">
+    <form method="GET" action="{% url 'dashboard' %}" style="display: flex; align-items: center;"> 
+        {% csrf_token %}
+        <label style="font-size: 32px; white-space: nowrap;">{{ user.role }} Analytics Dashboard</label>
+        <input style="margin-left: 1%; width: 150px" value="{{ after }}" type="date" class="search-input" name="after">
+        <label style="margin-left: 1%; font-size: 16px;">to</label>
+        <input style="margin-left: 1%; width: 150px" value="{{ before }}" type="date" class="search-input" name="before">
+        <button style="width: 40px; margin-left: 2%; display: flex; justify-content: center;" type="submit">
+            <i class="material-icons" style="font-size: 18px; padding-left: 3px;">search</i>
+        </button>
+    </form> 
+    <form method="GET" action="{% url 'dashboard' %}" style="display: flex; align-items: center; margin-left: 4%;"> 
+        {% csrf_token %}
+        <button style="width: 12vw; margin-left: 2%; display: flex; justify-content: center;" name="action" value="download" type="submit">Download Admissions</button>
+    </form>    
+</div>
+
+<br>
+
+<div style="width: 75vw; display: flex; flex-direction: column; overflow-y: auto; max-height: 70vh;">
+    <div style="display: flex; justify-content: space-between;">
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
+            <div style="flex: 0 0 48%; display: flex;  align-items: center; padding: 10px; background-color: #f0f0f0; margin: 10px;">
+                <h3 style="margin-left: 1%;">Admissions by Sex</h3>
+                <canvas id="sex_PieChart"></canvas>
+            </div>
+            <div style="flex: 0 0 48%; display: flex; align-items: center; padding: 10px; background-color: #f0f0f0; margin: 10px;">
+                <h3 style="margin-left: 1%;">Readmission Ratio</h3>
+                <canvas id="readmission_PieChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div style="flex: 0 0 100%; text-align: center; padding: 10px; background-color: #f0f0f0; margin: 15px;">
+        <h3>Admissions and Readmissions Over Time</h3>
+        <canvas id="admissions_LineChart" style="max-width: 100%;"></canvas>
+    </div>
+    <div style="display: flex; justify-content: space-between;">
+        <div style="flex: 0 0 48%; text-align: center; padding: 10px; background-color: #f0f0f0; margin: 10px;">
+            <h3>Most Frequent Diseases</h3>
+            <canvas id="commonDiseases_BarChart"></canvas>
+        </div>
+        <div style="flex: 0 0 48%; text-align: center; padding: 10px; background-color: #f0f0f0; margin: 10px;">
+            <h3>Most Frequent Treatments</h3>
+            <canvas id="commonTreatments_BarChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- sex pie chart -->
+<script>
+    const sex_labels = {{ sex_labels|safe }};
+    const sex_data = {{ sex_data|safe }};
+
+    const sex_PieChart = document.getElementById('sex_PieChart').getContext('2d');
+    new Chart(sex_PieChart, {
+        type: 'pie',
+        data: {
+            labels: sex_labels,
+            datasets: [{
+                label: 'Admissions by Sex',
+                data: sex_data,
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(255, 99, 132, 0.2)',
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 99, 132, 1)',
+                ],
+                borderWidth: 1,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 14,
+                        }
+                    }
+                },
+                datalabels: {
+                    formatter: (value, context) => {
+                        const total = context.chart.data.datasets[0].data.reduce((sum, val) => sum + val, 0);
+                        const percentage = ((value / total) * 100).toFixed(1) + '%';
+                        return percentage;
+                    },
+                    color: '#000', // Text color
+                    font: {
+                        size: 12,
+                        weight: 'bold',
+                    },
+                    anchor: 'center', // Position of labels
+                    align: 'center',
+                },
+            },
+            layout: {
+                padding: 20
+            }
+        },
+        plugins: [ChartDataLabels] 
+    });
+</script>
+
+<!-- readmission pie chart -->
+<script>
+    const readmission_labels = {{ readmission_labels|safe }};
+    const readmission_data = {{ readmission_data|safe }};
+
+    const readmission_PieChart = document.getElementById('readmission_PieChart').getContext('2d');
+    new Chart(readmission_PieChart, {
+        type: 'pie',
+        data: {
+            labels: readmission_labels,
+            datasets: [{
+                label: 'Readmission Status',
+                data: readmission_data,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                ],
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 14,
+                        }
+                    }
+                },
+                datalabels: {
+                    formatter: (value, context) => {
+                        const total = context.chart.data.datasets[0].data.reduce((sum, val) => sum + val, 0);
+                        const percentage = ((value / total) * 100).toFixed(1) + '%';
+                        return percentage;
+                    },
+                    color: '#000', // Text color
+                    font: {
+                        size: 12,
+                        weight: 'bold',
+                    },
+                    anchor: 'center', // Position of labels
+                    align: 'center',
+                },
+            },
+            layout: {
+                padding: 20
+            }
+        },
+        plugins: [ChartDataLabels]
+    });
+</script>
+
+<!-- line chart -->
+<script>
+    const line_chart_labels = {{ line_chart_labels|safe }};
+    const all_admissions_data = {{ all_admissions_data|safe }};
+    const readmissions_data = {{ readmissions_data|safe }};
+
+    const admissions_LineChart = document.getElementById('admissions_LineChart').getContext('2d');
+    new Chart(admissions_LineChart, {
+        type: 'line',
+        data: {
+            labels: line_chart_labels,
+            datasets: [
+                {
+                    label: 'All Admissions',
+                    data: all_admissions_data,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.4,
+                },
+                {
+                    label: 'Readmissions',
+                    data: readmissions_data,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.4,
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Month',
+                    },
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Admissions Count',
+                    },
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    },
+                },
+            },
+        },
+    });
+</script>
+
+<!-- disease bar chart -->
+<script>
+    const commonDiseases_labels = {{ commonDiseases_labels|safe }};
+    const commonDiseases_data = {{ commonDiseases_data|safe }};
+
+    const commonDiseases_BarChart = document.getElementById('commonDiseases_BarChart').getContext('2d');
+    new Chart(commonDiseases_BarChart, {
+        type: 'bar',
+        data: {
+            labels: commonDiseases_labels,
+            datasets: [{
+                label: 'Frequency of Diagnosis',
+                data: commonDiseases_data,
+                backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Disease',
+                    },
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Occurrences',
+                    },
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    },
+                },
+            },
+        },
+    });
+</script>
+
+<!-- treatment bar chart -->
+<script>
+    const commonTreatments_labels = {{ commonTreatments_labels|safe }};
+    const commonTreatments_data = {{ commonTreatments_data|safe }};
+
+    const commonTreatments_BarChart = document.getElementById('commonTreatments_BarChart').getContext('2d');
+    new Chart(commonTreatments_BarChart, {
+        type: 'bar',
+        data: {
+            labels: commonTreatments_labels,
+            datasets: [{
+                label: 'Frequency of Treatments',
+                data: commonTreatments_data,
+                backgroundColor: 'rgba(255, 159, 64, 0.6)',
+                borderColor: 'rgba(255, 159, 64, 1)',
+                borderWidth: 1,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Treatment',
+                    },
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Occurrences',
+                    },
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    },
+                },
+            },
+        },
+    });
+</script>
+
+{% endblock %}

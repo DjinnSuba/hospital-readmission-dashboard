@@ -39,7 +39,7 @@ class Patient(models.Model):
 
 class Admission(models.Model):
     clinician = models.ForeignKey(Account, on_delete=models.CASCADE, limit_choices_to={'role': 'Clinician'})
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='admissions')
     is_readmission = models.BooleanField(default=False)
     diagnosis = models.TextField()
     treatment = models.TextField()
