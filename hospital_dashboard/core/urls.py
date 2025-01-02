@@ -30,4 +30,6 @@ urlpatterns = [
     path('import-admissions/', views.import_admissions, name='import_admissions'),
     path('import-patients/', views.import_patients, name='import_patients'),
     path('import-users/', views.import_users, name='import_users'),
+
+    path('generate-pdf/<int:patient_id>/', views.generate_patient_pdf, name='generate_patient_pdf'),
 ]
