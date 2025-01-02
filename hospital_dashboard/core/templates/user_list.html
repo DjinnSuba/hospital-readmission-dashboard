@@ -5,8 +5,11 @@
 <h1>User List</h1>
 
 <!-- Add User Button -->
-<button type="button" class="width: 7vw; font-size: 14px" data-bs-toggle="modal" data-bs-target="#addUserModal">
+<button type="button" style="width: 7vw; font-size: 14px" data-bs-toggle="modal" data-bs-target="#addUserModal">
   Add User
+</button>
+<button type="button" style="width: 7vw; font-size: 14px" data-bs-toggle="modal" data-bs-target="#importUserModal">
+  Import CSV
 </button>
 
 <!-- Modal structure for Add User -->
@@ -23,6 +26,8 @@
     </div>
   </div>
 </div>
+
+
 
 <!-- User Table -->
 <table class="table table-bordered mt-4">
@@ -75,6 +80,21 @@
   </div>
 </div>
 
+<!-- Import User Modal -->
+<div class="modal fade" id="importUserModal" tabindex="-1" aria-labelledby="importUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="importUserModalLabel">Import CSV</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="modal-import-form-content">Loading...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -116,6 +136,67 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  const importUserModal = document.getElementById('importUserModal');
+  const importModalFormContent = document.getElementById('modal-import-form-content');
+
+  const importCsvButton = document.querySelector('[data-bs-target="#importUserModal"]');
+
+  importUserModal.addEventListener('show.bs.modal', function () {
+    const url = "{% url 'import_users' %}"; // Set this to the endpoint that provides the import form content
+  
+    importModalFormContent.innerHTML = '<p class="text-center text-muted">Loading...</p>';
+  
+    // Fetch the import form
+    fetch(url)
+      .then(response => {
+        if (!response.ok) throw new Error('Failed to load the import form.');
+        return response.text();
+      })
+      .then(html => {
+        importModalFormContent.innerHTML = html;
+  
+        // Attach the form submission listener
+        const form = importModalFormContent.querySelector('form');
+        if (form) form.action = url;
+  
+        addImportFormSubmissionListener(form);
+      })
+      .catch(error => {
+        console.error('Error loading import form:', error);
+        importModalFormContent.innerHTML = '<div class="alert alert-danger">Something went wrong. Please try again later.</div>';
+      });
+  });
+  
+
+  function addImportFormSubmissionListener(form) {
+    if (!form) return;
+  
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const formData = new FormData(form);
+  
+      fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('CSV imported successfully!');
+            location.reload();
+          } else {
+            alert('Failed to import CSV.');
+          }
+        })
+        .catch(error => {
+          console.error('Error submitting form:', error);
+        });
+    });
+  }
+
   const editModal = new bootstrap.Modal(document.getElementById('editModal'));
   const editModalFormContent = document.getElementById('modal-edit-form-content');
 
@@ -140,7 +221,7 @@ document.addEventListener('DOMContentLoaded', function () {
           const form = editModalFormContent.querySelector('form');
           if (form) form.action = url;
 
-          addFormSubmissionListener(form);
+          addEditFormSubmissionListener(form);
           editModal.show();
         })
         .catch(error => {
@@ -150,7 +231,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  function addFormSubmissionListener(form) {
+  function addEditFormSubmissionListener(form) {
     form.addEventListener('submit', function (event) {
       event.preventDefault();
       const formData = new FormData(form);

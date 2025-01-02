@@ -4,7 +4,7 @@
 
 
 <div style="width: 83vw; overflow-x: auto; max-height: 70vh; overflow-y: auto; display: flex; align-items: center; flex-wrap: wrap; flex-grow: 1;">
-    <form method="GET" action="" style="display: flex; align-items: center;"> 
+    <form method="GET" action="{% url 'admission_patients' %}" style="display: flex; align-items: center;"> 
         {% csrf_token %}
         <label style="font-size: 32px; white-space: nowrap;">Select Patient to Admit</label>
         <input style="margin-left: 3%;" value="{{ name }}" type="text" class="search-input" name="name" placeholder="Search by name">

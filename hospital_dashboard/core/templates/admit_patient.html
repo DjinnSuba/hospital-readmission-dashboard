@@ -5,7 +5,7 @@
 
 <div style="width: 83vw; overflow-x: auto; max-height: 70vh; overflow-y: auto; display: flex; align-items: center; flex-wrap: wrap; flex-grow: 1;">
     <label style="font-size: 32px; white-space: nowrap;">{{ patient.name }}</label> 
-    <form method="GET" action="" style="display: flex; align-items: center; margin-left: 1%;"> 
+    <form method="GET" action="{% url 'admit_patient' patient.id %}" style="display: flex; align-items: center; margin-left: 1%;"> 
         {% csrf_token %}
         <input value="{{ diagnosis }}" type="text" class="search-input" name="diagnosis" placeholder="Search by diagnosis">
 

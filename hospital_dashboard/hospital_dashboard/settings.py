@@ -79,7 +79,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'hospital-dashboard',  # Your PostgreSQL database name
         'USER': 'postgres',       # Your PostgreSQL username
-        'PASSWORD': 'password',   # Your PostgreSQL password
+        'PASSWORD': 'HelpMeStudyPlease',   # Your PostgreSQL password
         'HOST': 'localhost',
         'PORT': '5432',                # Default PostgreSQL port
     }

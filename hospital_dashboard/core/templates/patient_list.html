@@ -4,8 +4,11 @@
 <h1>Patient List</h1>
 
 <!-- Add Patient Button -->
-<button type="button" class="width: 7vw; font-size: 14px" data-bs-toggle="modal" data-bs-target="#addPatientModal">
+<button type="button" style="width: 7vw; font-size: 14px" data-bs-toggle="modal" data-bs-target="#addPatientModal">
   Add Patient
+</button>
+<button type="button" style="width: 7vw; font-size: 14px" data-bs-toggle="modal" data-bs-target="#importPatientModal">
+  Import CSV
 </button>
 
 <!-- Modal structure for Add Patient -->
@@ -24,6 +27,21 @@
       </div>
     </div>
   </div>
+
+<!-- Import Patient Modal -->
+<div class="modal fade" id="importPatientModal" tabindex="-1" aria-labelledby="importPatientModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="importPatientModalLabel">Import CSV</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="modal-import-form-content">Loading...</div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Table to display the patients -->
 <table class="table table-bordered mt-4">
@@ -54,8 +72,14 @@
         <button type="button" class="btn btn-warning edit-button"
           data-url="{% url 'edit_patient' patient.pk %}"
           data-title="Edit Patient - {{ patient.name }}"
-          data-bs-toggle="modal" data-bs-target="#editModal">
+          data-bs-toggle="modal" data-bs-target="#editModal"
+          style="width: 60px" >
           Edit
+        </button>
+
+        <!-- Delete Button -->
+        <button type="button" class="btn btn-danger delete-button" style="margin-top: 5px; width: 70px">
+          Delete
         </button>
       </td>
     </tr>
@@ -85,6 +109,68 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  const importPatientModal = document.getElementById('importPatientModal');
+  const importModalFormContent = document.getElementById('modal-import-form-content');
+
+  const importCsvButton = document.querySelector('[data-bs-target="#importPatientModal"]');
+
+  importPatientModal.addEventListener('show.bs.modal', function () {
+    const url = "{% url 'import_patients' %}"; // Set this to the endpoint that provides the import form content
+  
+    importModalFormContent.innerHTML = '<p class="text-center text-muted">Loading...</p>';
+  
+    // Fetch the import form
+    fetch(url)
+      .then(response => {
+        if (!response.ok) throw new Error('Failed to load the import form.');
+        return response.text();
+      })
+      .then(html => {
+        importModalFormContent.innerHTML = html;
+  
+        // Attach the form submission listener
+        const form = importModalFormContent.querySelector('form');
+        if (form) form.action = url;
+  
+        addImportFormSubmissionListener(form);
+      })
+      .catch(error => {
+        console.error('Error loading import form:', error);
+        importModalFormContent.innerHTML = '<div class="alert alert-danger">Something went wrong. Please try again later.</div>';
+      });
+  });
+  
+
+  function addImportFormSubmissionListener(form) {
+    if (!form) return;
+  
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const formData = new FormData(form);
+  
+      fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('CSV imported successfully!');
+            location.reload();
+          } else {
+            alert('Failed to import CSV.');
+          }
+        })
+        .catch(error => {
+          console.error('Error submitting form:', error);
+        });
+    });
+  }
+
+
   // Add Patient Modal
   const patientModal = document.getElementById('addPatientModal');
   const patientModalFormContent = document.getElementById('modal-patient-form-content');

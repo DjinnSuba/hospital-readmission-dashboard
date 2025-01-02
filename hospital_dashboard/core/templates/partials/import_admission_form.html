@@ -1,10 +1,45 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Import Admissions</h1>
+<div style="width: 75vw; overflow-x: auto; max-height: 70vh; overflow-y: auto; display: flex; align-items: center; flex-wrap: wrap; flex-grow: 1;">
+    <label style="font-size: 32px; white-space: nowrap;">Import Admissions</label>
+</div>
+
+<br>
+
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit" class="btn btn-primary">Upload</button>
 </form>
+
+<br>
+
+<div style="width: 75vw; overflow-x: auto; max-height: 70vh; overflow-y: auto;">
+    <table style="border-collapse: collapse; width: 75vw;"> 
+        <thead>
+            <tr>
+                <th style="padding-left: 30px;">Clinician</th>
+                <th>Name</th>
+                <th>Diagnosis</th>
+                <th>Treatment</th>
+                <th>Date</th>
+                <th style="padding-right: 50px;">Readmission</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for x in admissions %}
+            <tr>
+                <td style="padding-left: 30px;"><em>{{ x.clinician.name }}</em></td>
+                <td><em>{{ x.patient.name }}</em></td>
+                <td><em>{{ x.diagnosis }}</em></td>
+                <td><em>{{ x.treatment }}</em></td>
+                <td><em>{{ x.date }}</em></td>
+                <td style="padding-right: 50px;"><em>{% if x.is_readmission %}Yes{% else %}No{% endif %}</em></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
 {% endblock %}
