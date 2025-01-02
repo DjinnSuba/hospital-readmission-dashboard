@@ -47,25 +47,21 @@ def download_data(user, admissions):
     writer = csv.writer(response)  
 
     writer.writerow([
-        'Patient Name', 
-        'Patient Email', 
-        'Clinician Name', 
-        'Clinician Email', 
-        'Is Readmission', 
-        'Diagnosis', 
-        'Treatment', 
-        'Date', 
-        'Remarks'
+        "clinician_username",
+        "patient_email",
+        "is_readmission",
+        "diagnosis",
+        "treatment",
+        "date",
+        "remarks"
     ])
 
     # Write data rows
     for admission in admissions:
         writer.writerow([
-            admission.patient.name,          # Patient name
+            admission.clinician.username,        # Clinician name
             admission.patient.email,         # Patient email
-            admission.clinician.name,        # Clinician name
-            admission.clinician.email,       # Clinician email
-            'Yes' if admission.is_readmission else 'No',  # Is readmission
+            'True' if admission.is_readmission else 'False',  # Is readmission
             admission.diagnosis,             # Diagnosis
             admission.treatment,             # Treatment
             admission.date,                  # Date
@@ -463,8 +459,8 @@ def import_admissions(request):
                             patient=patient,
                             is_readmission=bool(row["is_readmission"]),
                             diagnosis=row["diagnosis"],
-                            treatment=row["treatment"],
-                            date=row["date"],
+                            treatment=row.get("treatment", ""),
+                            date=row.get("date", ""),
                             remarks=row.get("remarks", ""),
                         )
                         records_created += 1
