@@ -51,9 +51,17 @@
         <!-- Edit Button -->
         <button type="button" class="btn btn-warning edit-button"
           data-url="{% url 'edit_user' account.pk %}"
-          data-title="Edit User - {{ account.username }}">
+          data-title="Edit User - {{ account.username }}"
+          style="width: 60px">
           Edit
         </button>
+
+        <!-- Delete Button -->
+        <form method='POST' action="{% url 'delete_user' account.id %}"> {% csrf_token %}
+          <button type="submit"  class="btn btn-danger delete-button" style="margin-top: 5px; width: 70px">
+            Delete
+          </button>
+        </form>
       </td>
     </tr>
     {% endfor %}

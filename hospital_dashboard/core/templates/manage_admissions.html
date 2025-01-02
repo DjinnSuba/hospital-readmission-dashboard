@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<form method="GET" action="" style="display: flex; align-items: center;"> 
+    {% csrf_token %}
+    <label style="font-size: 32px; white-space: nowrap;">Manage Admissions</label>
+    <input style="margin-left: 3%;" value="{{ name }}" type="text" class="search-input" name="name" placeholder="Search by name">
+    <input style="margin-left: 1%;" value="{{ diagnosis }}" type="text" class="search-input" name="diagnosis" placeholder="Search by diagnosis">
+    <input style="margin-left: .5%; width: 150px" value="{{ after }}" type="date" class="search-input" name="after">
+    <label style="margin-left: .5%; font-size: 16px;">to</label>
+    <input style="margin-left: 1%; width: 150px" value="{{ before }}" type="date" class="search-input" name="before">
+    <button style="width: 40px; margin-left: 2%; display: flex; justify-content: center;" type="submit">
+        <i class="material-icons" style="font-size: 18px; padding-left: 3px;">search</i>
+    </button>
+    <button type="button" style="width: 7vw; font-size: 14px; margin-left: 1%;" data-bs-toggle="modal" data-bs-target="#importAdmissionModal">
+        Import CSV
+    </button>
+</form>
+<br>
+
+<div class="modal fade" id="importAdmissionModal" tabindex="-1" aria-labelledby="importAdmissionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="importAdmissionModalLabel">Import CSV</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="modal-import-form-content">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<table class="table table-bordered mt-4"> 
+    <thead>
+        <tr>
+            <th>Clinician</th>
+            <th>Patient</th>
+            <th>Diagnosis</th>
+            <th>Treatment</th>
+            <th>Date</th>
+            <th>Readmission</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for x in admissions %}
+        <tr>
+            <td><em>{{ x.clinician.name }}</em></td>
+            <td><em>{{ x.patient.name }}</em></td>
+            <td><em>{{ x.diagnosis }}</em></td>
+            <td><em>{{ x.treatment }}</em></td>
+            <td><em>{{ x.date }}</em></td>
+            <td><em>{% if x.is_readmission %}Yes{% else %}No{% endif %}</em></td>
+            <td><!-- Edit Button -->
+                <button type="button" class="btn btn-warning edit-button"
+                  data-url="{% url 'edit_admission' x.pk %}"
+                  style="width: 60px"
+                  data-bs-toggle="modal" 
+                  data-bs-target="#editAdmissionModal">
+                  Edit
+                </button>
+        
+                <!-- Delete Button -->
+                <form method='POST' action="{% url 'delete_admission' x.id %}"> {% csrf_token %}
+                  <button type="submit"  class="btn btn-danger delete-button" style="margin-top: 5px; width: 70px">
+                    Delete
+                  </button>
+                </form></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<div class="modal fade" id="editAdmissionModal" tabindex="-1" aria-labelledby="editAdmissionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="editAdmissionModalLabel">Edit Admission</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="editAdmissionModalContent">
+            <!-- Form will be dynamically loaded here -->
+            <p class="text-center text-muted">Loading...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const importAdmissionModal = document.getElementById('importAdmissionModal');
+        const importModalFormContent = document.getElementById('modal-import-form-content');
+      
+        const importCsvButton = document.querySelector('[data-bs-target="#importAdmissionModal"]');
+      
+        importAdmissionModal.addEventListener('show.bs.modal', function () {
+          const url = "{% url 'import_admissions' %}"; // Set this to the endpoint that provides the import form content
+        
+          importModalFormContent.innerHTML = '<p class="text-center text-muted">Loading...</p>';
+        
+          // Fetch the import form
+          fetch(url)
+            .then(response => {
+              if (!response.ok) throw new Error('Failed to load the import form.');
+              return response.text();
+            })
+            .then(html => {
+              importModalFormContent.innerHTML = html;
+        
+              // Attach the form submission listener
+              const form = importModalFormContent.querySelector('form');
+              if (form) form.action = url;
+        
+              addImportFormSubmissionListener(form);
+            })
+            .catch(error => {
+              console.error('Error loading import form:', error);
+              importModalFormContent.innerHTML = '<div class="alert alert-danger">Something went wrong. Please try again later.</div>';
+            });
+        });
+        
+      
+        function addImportFormSubmissionListener(form) {
+          if (!form) return;
+        
+          form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            const formData = new FormData(form);
+        
+            fetch(form.action, {
+              method: 'POST',
+              body: formData,
+              headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  alert('CSV imported successfully!');
+                  location.reload();
+                } else {
+                  alert('Failed to import CSV.');
+                }
+              })
+              .catch(error => {
+                console.error('Error submitting form:', error);
+              });
+          });
+        }
+
+        const editModal = document.getElementById('editAdmissionModal');
+        const editModalContent = document.getElementById('editAdmissionModalContent');
+
+        editModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const url = button.getAttribute('data-url');
+
+            editModalContent.innerHTML = '<p class="text-center text-muted">Loading...</p>';
+
+            fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    editModalContent.innerHTML = html;
+
+                    const form = document.getElementById('edit-admission-form');
+                    if (form) {
+                        form.addEventListener('submit', function (event) {
+                            event.preventDefault();
+                            const formData = new FormData(form);
+                            fetch(form.action, {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+                                },
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    alert(data.message);
+                                    location.reload();
+                                } else {
+                                    alert('Errors: ' + JSON.stringify(data.errors));
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('An error occurred while submitting the form.');
+                            });
+                        });
+                    }
+                })
+                .catch(error => {
+                    editModalContent.innerHTML = `<div class="alert alert-danger">Error loading form: ${error}</div>`;
+                });
+        });
+      
+        function displayFormErrors(form, errors) {
+          form.querySelectorAll('.text-danger').forEach(el => el.remove());
+          for (const [field, messages] of Object.entries(errors)) {
+            const fieldElement = form.querySelector(`[name="${field}"]`);
+            if (fieldElement) {
+              const errorContainer = document.createElement('div');
+              errorContainer.className = 'text-danger small mt-1';
+              errorContainer.textContent = messages.map(msg => msg.message).join(', ');
+              fieldElement.parentElement.appendChild(errorContainer);
+            }
+          }
+        }
+    });      
+</script>
+
+{% endblock %}

@@ -21,9 +21,12 @@ urlpatterns = [
     path('admissions/patients/', views.admission_patients, name='admission_patients'),
     path('admissions/patients/<int:id>/', views.admit_patient, name='admit_patient'),
     path('add-admission/patient/<int:pk>', views.add_patient_admission, name='add_patient_admission'),
+    path('admissions/admin/', views.manage_admissions, name='manage_admissions'),
 
     path('edit-patient/<int:pk>/', views.edit_patient, name='edit_patient'),
-    
+    path('delete-patient/<int:pk>/', views.delete_patient, name='delete_patient'),
+    path('delete-user/<int:pk>/', views.delete_user, name='delete_user'),
+    path('delete-admission/<int:pk>/', views.delete_admission, name='delete_admission'),
     path('import-admissions/', views.import_admissions, name='import_admissions'),
     path('import-patients/', views.import_patients, name='import_patients'),
     path('import-users/', views.import_users, name='import_users'),
