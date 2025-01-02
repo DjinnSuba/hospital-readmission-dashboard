@@ -37,3 +37,6 @@ class UserEditForm(forms.ModelForm):
     class Meta:
         model = Account
         fields = ['username', 'email', 'role']
+
+class CSVUploadForm(forms.Form):
+    csv_file = forms.FileField(label="Upload CSV File")

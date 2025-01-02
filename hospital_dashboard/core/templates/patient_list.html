@@ -36,6 +36,7 @@
       <th>Address</th>
       <th>Contact Number</th>
       <th>Email</th>
+      <th>Actions</th>
     </tr>
   </thead>
   <tbody>
@@ -48,10 +49,39 @@
       <td>{{ patient.address }}</td>
       <td>{{ patient.contact_number }}</td>
       <td>{{ patient.email }}</td>
+      <td>
+        <!-- Edit Button -->
+        <button type="button" class="btn btn-warning edit-button"
+          data-url="{% url 'edit_patient' patient.pk %}"
+          data-title="Edit Patient - {{ patient.name }}"
+          data-bs-toggle="modal" data-bs-target="#editModal">
+          Edit
+        </button>
+      </td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+
+<!-- Edit Patient Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editModalLabel">Edit Patient</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="modal-edit-form-content">
+          <p class="text-center text-muted">Loading...</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -91,6 +121,77 @@ document.addEventListener('DOMContentLoaded', function () {
           }
         });
     });
+  }
+  const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+  const editModalFormContent = document.getElementById('modal-edit-form-content');
+
+  document.querySelectorAll('.edit-button').forEach(button => {
+    button.addEventListener('click', function () {
+      const url = this.dataset.url; // URL for the selected patient
+      const title = this.dataset.title;
+
+      document.getElementById('editModalLabel').textContent = title;
+      editModalFormContent.innerHTML = '<p class="text-center text-muted">Loading...</p>';
+
+      // Fetch the edit form
+      fetch(url)
+        .then(response => {
+          console.log('Response Status:', response.status);
+          if (!response.ok) throw new Error('Failed to load the edit form.');
+          return response.text();
+        })
+        .then(html => {
+          console.log('Received HTML:', html);
+          editModalFormContent.innerHTML = html;
+          const form = editModalFormContent.querySelector('form');
+          if (form) form.action = url;
+          addFormSubmissionListener(form);
+          editModal.show();
+        })
+        .catch(error => {
+          console.error('Error loading edit form:', error);
+          editModalFormContent.innerHTML = `<div class="alert alert-danger">${error.message || 'Something went wrong. Please try again later.'}</div>`;
+        });
+    });
+  });
+
+  function addFormSubmissionListener(form) {
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const formData = new FormData(form);
+
+      fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert(data.message || 'Patient updated successfully!');
+            location.reload();
+          } else {
+            displayFormErrors(form, data.errors || {});
+          }
+        })
+        .catch(error => {
+          console.error('Error submitting form:', error);
+          alert('Something went wrong. Please try again later.');
+        });
+    });
+  }
+
+  function displayFormErrors(form, errors) {
+    form.querySelectorAll('.text-danger').forEach(el => el.remove());
+    for (const [field, messages] of Object.entries(errors)) {
+      const fieldElement = form.querySelector(`[name="${field}"]`);
+      if (fieldElement) {
+        const errorContainer = document.createElement('div');
+        errorContainer.className = 'text-danger small mt-1';
+        errorContainer.textContent = messages.map(msg => msg.message).join(', ');
+        fieldElement.parentElement.appendChild(errorContainer);
+      }
+    }
   }
 });
 
