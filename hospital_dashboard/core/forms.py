@@ -48,3 +48,11 @@ class PatientAdmissionRecordEntry(forms.ModelForm):
             'treatment': forms.Textarea(attrs={'rows': 3}),
             'remarks': forms.Textarea(attrs={'rows': 2}),
         }
+
+class PatientEditForm(forms.ModelForm):
+    class Meta:
+        model = Patient
+        fields = ['name', 'sex', 'birthdate', 'address', 'contact_number', 'email']
+
+class CSVUploadForm(forms.Form):
+    csv_file = forms.FileField(label="Upload CSV File")
