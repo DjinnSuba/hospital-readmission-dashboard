@@ -556,6 +556,32 @@ def generate_patient_pdf(request, patient_id):
     elements.append(patient_name)
     elements.append(Spacer(1, 20))  # Add spacing
 
+    # Add patient details
+    detail_style = styles['Normal']
+
+    # Patient Sex
+    sex = Paragraph(f"Sex: {patient.get_sex_display()}", detail_style)
+    elements.append(sex)
+
+    # Patient Birthdate
+    birthdate = Paragraph(f"Birthdate: {patient.birthdate.strftime('%B %d, %Y')}", detail_style)
+    elements.append(birthdate)
+
+    # Patient Address
+    address = Paragraph(f"Address: {patient.address}", detail_style)
+    elements.append(address)
+
+    # Patient Contact Number
+    contact_number = Paragraph(f"Contact Number: {patient.contact_number}", detail_style)
+    elements.append(contact_number)
+
+    # Patient Email
+    email = Paragraph(f"Email: {patient.email}", detail_style)
+    elements.append(email)
+
+    # Add spacing after details
+    elements.append(Spacer(1, 20))
+
     # Add admissions details
     for index, admission in enumerate(admissions, start=1):
         admission_title = Table([[f"Admission #{index}"]], colWidths=[500])
