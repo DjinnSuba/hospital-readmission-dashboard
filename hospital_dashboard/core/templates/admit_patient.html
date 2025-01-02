@@ -40,7 +40,7 @@
         </thead>
         <tbody>
         {% for x in admissions %}
-            <tr onclick="window.location.href='/admissions/patients/{{ x.id }}/'">
+            <tr>
                 <td style="padding-left: 30px;"><em>{{ x.clinician }}</em></td>
                 <td><em>{{ x.diagnosis }}</em></td>
                 <td><em>{{ x.treatment }}</em></td>
