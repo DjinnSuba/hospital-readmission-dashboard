@@ -1,10 +1,13 @@
-from datetime import datetime
+import csv
+from datetime import date, datetime
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
+from django.db.models import Count
+from django.db.models.functions import TruncMonth
 
 from .forms import UserRegisterForm, UserLoginForm, AdmissionRecordEntry, PatientRecordEntry, UserEditForm, PatientAdmissionRecordEntry
 from .models import Admission, Patient, Account
@@ -27,15 +30,138 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            if user.role == 'Admin':
-                return redirect('admin_dashboard')
-            elif user.role == 'Clinician':
-                return redirect('clinician_dashboard')
+            return redirect('dashboard')
         else:
             messages.error(request, "Invalid username or password. Please try again.")
     else:
-        form = UserLoginForm()
+        form = UserLoginForm() 
     return render(request, 'login.html', {'form': form})
+
+def download_data(user, admissions):
+    filename = user.name.replace(' ', '_') + '-' + str(date.today())
+    
+    response = HttpResponse(content_type='text/csv')  
+    response['Content-Disposition'] = 'attachment; filename=' + filename + '.csv'  
+    writer = csv.writer(response)  
+
+    writer.writerow([
+        'Patient Name', 
+        'Patient Email', 
+        'Clinician Name', 
+        'Clinician Email', 
+        'Is Readmission', 
+        'Diagnosis', 
+        'Treatment', 
+        'Date', 
+        'Remarks'
+    ])
+
+    # Write data rows
+    for admission in admissions:
+        writer.writerow([
+            admission.patient.name,          # Patient name
+            admission.patient.email,         # Patient email
+            admission.clinician.name,        # Clinician name
+            admission.clinician.email,       # Clinician email
+            'Yes' if admission.is_readmission else 'No',  # Is readmission
+            admission.diagnosis,             # Diagnosis
+            admission.treatment,             # Treatment
+            admission.date,                  # Date
+            admission.remarks or ''          # Remarks (handles null)
+        ])
+
+    return response  
+
+@login_required(login_url="/login")
+def dashboard(request):
+    context={}
+
+    user_id = request.user.id
+    user = Account.objects.get(id=user_id)
+    role = user.role    
+
+    if role == 'Clinician':
+        admissions = Admission.objects.filter(clinician__id=user_id)
+    else:
+        admissions = Admission.objects.all()
+
+    before = request.GET.get('before')
+    after = request.GET.get('after')
+
+    if before:
+        try:
+            # Convert to datetime object for validation
+            before_date = datetime.strptime(before, "%Y-%m-%d").date()
+            admissions = admissions.filter(date__lte=before_date)
+        except ValueError:
+            # Handle invalid date format
+            before_date = None
+
+    # Validate and filter by 'after' date
+    if after:
+        try:
+            after_date = datetime.strptime(after, "%Y-%m-%d").date()
+            admissions = admissions.filter(date__gte=after_date)
+        except ValueError:
+            after_date = None
+
+    context['before'] = before
+    context['after'] = after  
+
+    action = request.GET.get('action')
+    if action == "download":
+        return download_data(user, admissions)
+
+    admissions_by_sex = admissions.values('patient__sex').annotate(count=Count('id')).order_by('patient__sex')
+    context['sex_labels'] = [entry['patient__sex'] for entry in admissions_by_sex]
+    context['sex_data'] = [entry['count'] for entry in admissions_by_sex]
+
+    readmissions_count = admissions.filter(is_readmission=True).count()
+    non_readmissions_count = admissions.filter(is_readmission=False).count()
+    context['readmission_labels'] = ['Readmissions', 'Non-Readmissions']
+    context['readmission_data'] = [readmissions_count, non_readmissions_count]
+
+    common_diseases = admissions.values('diagnosis').annotate(count=Count('id')).order_by('-count')[:10]
+    context['commonDiseases_labels'] = [entry['diagnosis'] for entry in common_diseases]
+    context['commonDiseases_data'] = [entry['count'] for entry in common_diseases]
+
+    common_treatments = admissions.values('treatment').annotate(count=Count('id')).order_by('-count')[:10]
+    context['commonTreatments_labels'] = [entry['treatment'] for entry in common_treatments]
+    context['commonTreatments_data'] = [entry['count'] for entry in common_treatments]
+
+
+    # Monthly admissions for all admissions
+    admissions_by_month = (
+        admissions.annotate(month=TruncMonth('date'))
+        .values('month')
+        .annotate(count=Count('id'))
+        .order_by('month')
+    )
+
+    # Monthly admissions for readmissions only
+    readmissions_by_month = (
+        admissions.filter(is_readmission=True)
+        .annotate(month=TruncMonth('date'))
+        .values('month')
+        .annotate(count=Count('id'))
+        .order_by('month')
+    )
+
+    # Prepare data for the chart
+    months = [entry['month'].strftime('%B') for entry in admissions_by_month]
+    all_admissions_data = [entry['count'] for entry in admissions_by_month]
+    readmissions_data = [
+        next((entry['count'] for entry in readmissions_by_month if entry['month'] == month), 0)
+        for month in [entry['month'] for entry in admissions_by_month]
+    ]
+
+    context['line_chart_labels'] = months
+    context['all_admissions_data'] = all_admissions_data
+    context['readmissions_data'] = readmissions_data
+
+    context['user'] = user
+    return render(request, 'dashboard.html', context)
+
 
 @login_required(login_url="/login")
 def admin_dashboard(request):
@@ -60,6 +186,8 @@ def clinician_dashboard(request):
     else:
         form = AdmissionRecordEntry()
     return render(request, 'clinicianDashboard.html', {'form': form})
+
+
 
 @login_required(login_url="/login")
 def sign_out(request):
