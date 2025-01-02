@@ -2,15 +2,17 @@
 
 {% block content %}
 
-<h1>User List</h1>
+<div style="display: flex; gap: 1rem; align-items: center;">
+  <label style="font-size: 32px; white-space: nowrap;">Users</label>
 
-<!-- Add User Button -->
-<button type="button" style="width: 7vw; font-size: 14px" data-bs-toggle="modal" data-bs-target="#addUserModal">
-  Add User
-</button>
-<button type="button" style="width: 7vw; font-size: 14px" data-bs-toggle="modal" data-bs-target="#importUserModal">
-  Import CSV
-</button>
+  <!-- Add User Button -->
+  <button type="button" style="width: 7vw; font-size: 14px" data-bs-toggle="modal" data-bs-target="#addUserModal">
+    Add User
+  </button>
+  <button type="button" style="width: 7vw; font-size: 14px" data-bs-toggle="modal" data-bs-target="#importUserModal">
+    Import CSV
+  </button>
+</div>
 
 <!-- Modal structure for Add User -->
 <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">

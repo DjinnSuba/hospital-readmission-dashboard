@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<div style="display: flex; align-items: center;">
 <form method="GET" action="" style="display: flex; align-items: center;"> 
     {% csrf_token %}
-    <label style="font-size: 32px; white-space: nowrap;">Manage Admissions</label>
-    <input style="margin-left: 3%;" value="{{ name }}" type="text" class="search-input" name="name" placeholder="Search by name">
+    <label style="font-size: 32px; white-space: nowrap;">Admissions</label>
+    <input style="margin-left: 1%;" value="{{ name }}" type="text" class="search-input" name="name" placeholder="Search by name">
     <input style="margin-left: 1%;" value="{{ diagnosis }}" type="text" class="search-input" name="diagnosis" placeholder="Search by diagnosis">
     <input style="margin-left: .5%; width: 150px" value="{{ after }}" type="date" class="search-input" name="after">
     <label style="margin-left: .5%; font-size: 16px;">to</label>
@@ -12,10 +13,22 @@
     <button style="width: 40px; margin-left: 2%; display: flex; justify-content: center;" type="submit">
         <i class="material-icons" style="font-size: 18px; padding-left: 3px;">search</i>
     </button>
-    <button type="button" style="width: 7vw; font-size: 14px; margin-left: 1%;" data-bs-toggle="modal" data-bs-target="#importAdmissionModal">
+    <button type="button" style="width: 10vw; font-size: 14px; margin-left: 1%;" data-bs-toggle="modal" data-bs-target="#importAdmissionModal">
         Import CSV
     </button>
 </form>
+<form method="GET" action="{% url 'dashboard' %}" style="margin-left: 1%;">
+    {% csrf_token %}
+    <button 
+      style="width: 10vw; display: flex; justify-content: center; font-size: 14px;" 
+      name="action" 
+      value="download" 
+      type="submit"
+    >
+      Download Admissions
+    </button>
+  </form>
+</div>
 <br>
 
 <div class="modal fade" id="importAdmissionModal" tabindex="-1" aria-labelledby="importAdmissionModalLabel" aria-hidden="true">

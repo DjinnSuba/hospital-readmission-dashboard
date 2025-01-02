@@ -1,3 +1,10 @@
+<div>
+    <label>Download Template</label>
+    <a href="{% url 'download_admission_csv_template' %}">
+        <button type="button">CSV Template</button>
+    </a>
+</div>
+
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}

@@ -40,7 +40,7 @@ def login_view(request):
     return render(request, 'login.html', {'form': form})
 
 def download_data(user, admissions):
-    filename = user.name.replace(' ', '_') + '-' + str(date.today())
+    filename = 'admissions-' + user.username.replace(' ', '_') + '-' + str(date.today())
     
     response = HttpResponse(content_type='text/csv')  
     response['Content-Disposition'] = 'attachment; filename=' + filename + '.csv'  
@@ -71,7 +71,7 @@ def download_data(user, admissions):
     return response  
 
 def download_patients_data(user, patients):
-    filename = user.name.replace(' ', '_') + '-' + str(date.today())
+    filename = 'patients-' + user.username.replace(' ', '_') + '-' + str(date.today())
     
     response = HttpResponse(content_type='text/csv')  
     response['Content-Disposition'] = 'attachment; filename=' + filename + '.csv'  

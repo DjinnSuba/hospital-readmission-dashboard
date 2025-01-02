@@ -1,11 +1,3 @@
-{% extends 'base.html' %}
-
-{% block content %}
-<div style="width: 75vw; overflow-x: auto; max-height: 70vh; overflow-y: auto; display: flex; align-items: center; flex-wrap: wrap; flex-grow: 1;">
-    <label style="font-size: 32px; white-space: nowrap;">Import Patients</label>
-</div>
-
-<br>
 <div>
     <label>Download Template</label>
     <a href="{% url 'download_account_csv_template' %}">
@@ -18,31 +10,3 @@
     {{ form.as_p }}
     <button type="submit" class="">Upload</button>
 </form>
-
-
-<br>
-
-<div style="width: 75vw; overflow-x: auto; max-height: 70vh; overflow-y: auto;">
-    <table style="border-collapse: collapse; width: 75vw;"> 
-        <thead>
-            <tr>
-                <th style="padding-left: 30px;">Username</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for x in admissions %}
-            <tr>
-                <td style="padding-left: 30px;"><em>{{ x.username }}</em></td>
-                <td><em>{{ x.name}}</em></td>
-                <td><em>{{ x.email }}</em></td>
-                <td><em>{{ x.role}}</em></td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-{% endblock %}
