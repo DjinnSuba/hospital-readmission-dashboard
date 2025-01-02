@@ -37,3 +37,14 @@ class UserEditForm(forms.ModelForm):
     class Meta:
         model = Account
         fields = ['username', 'email', 'role']
+
+class PatientAdmissionRecordEntry(forms.ModelForm):
+    class Meta:
+        model = Admission
+        fields = ['is_readmission', 'diagnosis', 'treatment', 'date', 'remarks']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'diagnosis': forms.Textarea(attrs={'rows': 3}),
+            'treatment': forms.Textarea(attrs={'rows': 3}),
+            'remarks': forms.Textarea(attrs={'rows': 2}),
+        }

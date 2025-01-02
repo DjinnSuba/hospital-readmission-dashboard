@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<div style="width: 83vw; overflow-x: auto; max-height: 70vh; overflow-y: auto; display: flex; align-items: center; flex-wrap: wrap; flex-grow: 1;">
+    <label style="font-size: 32px; white-space: nowrap;">{{ patient.name }}</label> 
+    <form method="GET" action="" style="display: flex; align-items: center; margin-left: 1%;"> 
+        {% csrf_token %}
+        <input value="{{ diagnosis }}" type="text" class="search-input" name="diagnosis" placeholder="Search by diagnosis">
+
+        <button style="width: 40px; margin-left: 2%; display: flex; justify-content: center;" type="submit">
+            <i class="material-icons" style="font-size: 18px; padding-left: 3px;">search</i>
+        </button>
+    </form>
+    <button 
+        type="button" 
+        data-url="{% url 'add_patient_admission' patient.id %}" 
+        data-bs-toggle="modal" 
+        data-bs-target="#addAdmissionModal">
+        New Case
+    </button>
+
+</div>
+
+<br>
+
+<div style="width: 83vw; overflow-x: auto; max-height: 70vh; overflow-y: auto;">
+    <table style="border-collapse: collapse; width: 80vw;"> 
+        <thead>
+            <tr>
+                <th style="padding-left: 30px;">Clinician</th>
+                <th>Diagnosis</th>
+                <th>Treatment</th>
+                <th>Date</th>
+                <th>Readmission</th>
+                <th style="padding-right: 50px;">Remarks</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for x in admissions %}
+            <tr>
+                <td style="padding-left: 30px;"><em>{{ x.clinician }}</em></td>
+                <td><em>{{ x.diagnosis }}</em></td>
+                <td><em>{{ x.treatment }}</em></td>
+                <td><em>{{ x.date }}</em></td>
+                <td><em>{% if x.is_readmission %}Yes{% else %}No{% endif %}</em></td>
+                <td style="padding-right: 50px;"><em>{{ x.remarks }}</em></td>
+                <td>
+                    <button 
+                        type="button" 
+                        class="btn btn-warning edit-button" 
+                        data-url="{% url 'edit_admission' x.id %}" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#editAdmissionModal">
+                        Edit
+                    </button>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="addAdmissionModal" tabindex="-1" aria-labelledby="addAdmissionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addAdmissionModalLabel">New Admission</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="addAdmissionModalContent">
+          <!-- Form will be dynamically loaded here -->
+          <p class="text-center text-muted">Loading...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="editAdmissionModal" tabindex="-1" aria-labelledby="editAdmissionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="editAdmissionModalLabel">Edit Admission</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="editAdmissionModalContent">
+                <!-- Form will be dynamically loaded here -->
+                <p class="text-center text-muted">Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('addAdmissionModal');
+        const modalContent = document.getElementById('addAdmissionModalContent');
+
+        // Load the form dynamically
+        modal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget; 
+            const url = button.getAttribute('data-url');
+
+            modalContent.innerHTML = '<p class="text-center text-muted">Loading...</p>';
+
+            fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    modalContent.innerHTML = html;
+
+                    // Add event listener for dynamically loaded form
+                    const form = document.getElementById('add-admission-form');
+                    if (form) {
+                        form.addEventListener('submit', function (event) {
+                            event.preventDefault();
+                            const formData = new FormData(form);
+                            fetch(form.action, {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+                                },
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! status: ${response.status}`);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data.success) {
+                                    alert(data.message);
+                                    location.reload();
+                                } else {
+                                    alert('Errors: ' + JSON.stringify(data.errors));
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('An error occurred while submitting the form.');
+                            });
+                        });
+                    }
+
+                })
+                .catch(error => {
+                    modalContent.innerHTML = `<div class="alert alert-danger">Error loading form: ${error}</div>`;
+                });
+        });
+        const editModal = document.getElementById('editAdmissionModal');
+        const editModalContent = document.getElementById('editAdmissionModalContent');
+
+        editModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const url = button.getAttribute('data-url');
+
+            editModalContent.innerHTML = '<p class="text-center text-muted">Loading...</p>';
+
+            fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    editModalContent.innerHTML = html;
+
+                    const form = document.getElementById('edit-admission-form');
+                    if (form) {
+                        form.addEventListener('submit', function (event) {
+                            event.preventDefault();
+                            const formData = new FormData(form);
+                            fetch(form.action, {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+                                },
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    alert(data.message);
+                                    location.reload();
+                                } else {
+                                    alert('Errors: ' + JSON.stringify(data.errors));
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('An error occurred while submitting the form.');
+                            });
+                        });
+                    }
+                })
+                .catch(error => {
+                    editModalContent.innerHTML = `<div class="alert alert-danger">Error loading form: ${error}</div>`;
+                });
+        });
+    });
+
+  </script>
+  
+{% endblock %}

@@ -2,53 +2,53 @@
 
 {% block content %}
 
-<div style="width: 75vw; overflow-x: auto; max-height: 70vh; overflow-y: auto; display: flex; align-items: center; flex-wrap: wrap; flex-grow: 1;">
+
+<div style="width: 83vw; overflow-x: auto; max-height: 70vh; overflow-y: auto; display: flex; align-items: center; flex-wrap: wrap; flex-grow: 1;">
     <form method="GET" action="" style="display: flex; align-items: center;"> 
         {% csrf_token %}
-        <label style="font-size: 32px; white-space: nowrap;">Patient Admissions</label>
+        <label style="font-size: 32px; white-space: nowrap;">Select Patient to Admit</label>
         <input style="margin-left: 3%;" value="{{ name }}" type="text" class="search-input" name="name" placeholder="Search by name">
         <input style="margin-left: 1%;" value="{{ diagnosis }}" type="text" class="search-input" name="diagnosis" placeholder="Search by diagnosis">
-        <input style="margin-left: .5%; width: 150px" value="{{ after }}" type="date" class="search-input" name="after">
-        <label style="margin-left: .5%; font-size: 16px;">to</label>
-        <input style="margin-left: 1%; width: 150px" value="{{ before }}" type="date" class="search-input" name="before">
+
         <button style="width: 40px; margin-left: 2%; display: flex; justify-content: center;" type="submit">
             <i class="material-icons" style="font-size: 18px; padding-left: 3px;">search</i>
         </button>
     </form>
-    <form method="GET" action="{% url 'admission_patients' %}" style="display: flex; align-items: center; margin-left: 7%;">         
-        <button type="submit" style="width: 7vw; font-size: 14px;" >
-            Admit Patients
+    <form method="POST" action="" style="display: flex; align-items: center; margin-left: 4%;">         
+        <button type="button" style="width: 7vw; font-size: 14px;" >
+            Admit New
         </button>
     </form>
 </div>
 
+<!-- data-bs-toggle="modal" data-bs-target="#addAdmissionModal" -->
+
 <br>
 
-<div style="width: 75vw; overflow-x: auto; max-height: 70vh; overflow-y: auto;">
-    <table style="border-collapse: collapse; width: 75vw;"> 
+<div style="width: 83vw; overflow-x: auto; max-height: 70vh; overflow-y: auto;">
+    <table style="border-collapse: collapse; width: 80vw;"> 
         <thead>
             <tr>
                 <th style="padding-left: 30px;">Name</th>
-                <th>Diagnosis</th>
-                <th>Treatment</th>
-                <th>Date</th>
-                <th style="padding-right: 50px;">Readmission</th>
+                <th>Sex</th>
+                <th>Address</th>
+                <th>Contact Number</th>
+                <th style="padding-right: 50px;">Email</th>
             </tr>
         </thead>
         <tbody>
-        {% for x in admissions %}
-            <tr>
-                <td style="padding-left: 30px;"><em>{{ x.patient.name }}</em></td>
-                <td><em>{{ x.diagnosis }}</em></td>
-                <td><em>{{ x.treatment }}</em></td>
-                <td><em>{{ x.date }}</em></td>
-                <td style="padding-right: 50px;"><em>{% if x.is_readmission %}Yes{% else %}No{% endif %}</em></td>
+        {% for x in patients %}
+            <tr onclick="window.location.href='/admissions/patients/{{ x.id }}/'">
+                <td style="padding-left: 30px;"><em>{{ x.name }}</em></td>
+                <td><em>{{ x.sex }}</em></td>
+                <td><em>{{ x.address }}</em></td>
+                <td><em>{{ x.contact_number }}</em></td>
+                <td style="padding-right: 50px;"><em>{{ x.email }}</em></td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 </div>
-
   <!-- Modal structure for Add Admission -->
   <div class="modal fade" id="addAdmissionModal" tabindex="-1" aria-labelledby="addAdmissionModal" aria-hidden="true">
     <div class="modal-dialog">
