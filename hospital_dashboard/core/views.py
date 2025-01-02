@@ -451,9 +451,7 @@ def import_admissions(request):
     else:
         form = CSVUploadForm()
 
-    admissions = Admission.objects.all()
-
-    return render(request, "partials/import_admission_form.html", {"form": form, "admissions": admissions})
+    return render(request, "partials/import_admission_form.html", {"form": form})
 
 def process_csv_file(csv_file, model, unique_field, create_update_func):
     """
@@ -555,3 +553,80 @@ def import_users(request):
     else:
         form = CSVUploadForm()
     return render(request, "partials/import_user_form.html", {"form": form})
+
+
+@login_required(login_url="/login")
+def delete_patient(request, pk):
+    patient = get_object_or_404(Patient, pk=pk)
+    
+    if request.method == "POST":
+        patient.delete()
+        messages.success(request, "Patient deleted successfully.")
+          # Replace with your patient list view name
+
+    return redirect(request.META['HTTP_REFERER']) # Adjust for GET or other methods
+
+@login_required(login_url="/login")
+def delete_admission(request, pk):
+    admission = get_object_or_404(Admission, pk=pk)
+    
+    if request.method == "POST":
+        admission.delete()
+        messages.success(request, "Admission deleted successfully.") # Replace with your admission list view name
+    
+    return redirect(request.META['HTTP_REFERER'])
+
+@login_required(login_url="/login")
+def delete_user(request, pk):
+    user = get_object_or_404(Account, pk=pk)
+    
+    if request.method == "POST":
+        user.delete()
+        messages.success(request, "User deleted successfully.")
+    
+    return redirect(request.META['HTTP_REFERER'])
+
+@login_required(login_url="/login")
+def manage_admissions(request):
+    context={}
+    admissions = Admission.objects.all()
+
+    name = ''
+    if 'name' in request.GET:
+        name = request.GET.get('name')
+        admissions = admissions.filter(patient__name__icontains=name)
+
+    diagnosis = ''
+    if 'diagnosis' in request.GET:
+        diagnosis = request.GET.get('diagnosis')
+        admissions = admissions.filter(diagnosis__icontains=diagnosis)
+
+    before = request.GET.get('before')
+    #admissions = admissions.filter(date__lte=before)
+
+    after = request.GET.get('after')
+    #admissions = admissions.filter(date__gte=after)
+
+    if before:
+        try:
+            # Convert to datetime object for validation
+            before_date = datetime.strptime(before, "%Y-%m-%d").date()
+            admissions = admissions.filter(date__lte=before_date)
+        except ValueError:
+            # Handle invalid date format
+            before_date = None
+
+    # Validate and filter by 'after' date
+    if after:
+        try:
+            after_date = datetime.strptime(after, "%Y-%m-%d").date()
+            admissions = admissions.filter(date__gte=after_date)
+        except ValueError:
+            after_date = None
+
+    context['name'] = name
+    context['diagnosis'] = diagnosis
+    context['before'] = before
+    context['after'] = after        
+    context['admissions'] = admissions.order_by('-date')  # Retrieve all patients
+    return render(request, 'manage_admissions.html', context)
