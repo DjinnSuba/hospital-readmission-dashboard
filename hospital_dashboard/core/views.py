@@ -12,6 +12,11 @@ from django.db.models.functions import TruncMonth
 from .forms import UserRegisterForm, UserLoginForm, AdmissionRecordEntry, PatientRecordEntry, UserEditForm, PatientAdmissionRecordEntry, CSVUploadForm, PatientEditForm
 from .models import Admission, Patient, Account
 
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+
 import csv
 
 def register(request):
@@ -533,6 +538,82 @@ def create_or_update_account(account, data):
     account.password = data["password"]  # Consider hashing passwords here
     account.role = data["role"]
     account.save()
+
+def generate_patient_pdf(request, patient_id):
+    patient = Patient.objects.get(id=patient_id)
+    admissions = Admission.objects.filter(patient=patient)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{patient.name}_admissions.pdf"'
+
+    doc = SimpleDocTemplate(response, pagesize=letter)
+    elements = []
+
+    # Add patient name
+    styles = getSampleStyleSheet()
+    patient_name_style = styles['Title']
+    patient_name = Paragraph(f"{patient.name}", patient_name_style)
+    elements.append(patient_name)
+    elements.append(Spacer(1, 20))  # Add spacing
+
+    # Add admissions details
+    for index, admission in enumerate(admissions, start=1):
+        admission_title = Table([[f"Admission #{index}"]], colWidths=[500])
+        admission_title.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+            ('TOPPADDING', (0, 0), (-1, -1), 10),
+        ]))
+        elements.append(admission_title)
+        elements.append(Spacer(1, 10))
+
+        # Row for Diagnosis, Treatment, Date
+        row1 = [
+            Paragraph(f"<b>Diagnosis:</b> {admission.diagnosis}", styles["Normal"]),
+            Paragraph(f"<b>Treatment:</b> {admission.treatment}", styles["Normal"]),
+            Paragraph(f"<b>Date:</b> {admission.date.strftime('%Y-%m-%d')}", styles["Normal"]),
+        ]
+        table_row1 = Table([row1], colWidths=[166, 167, 167])
+        table_row1.setStyle(TableStyle([
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ]))
+        elements.append(table_row1)
+
+        # Row for Doctor
+        row2 = [[Paragraph(f"<b>Doctor:</b> {admission.clinician.name if admission.clinician else ''}", styles["Normal"])]]
+        table_row2 = Table(row2, colWidths=[500])
+        table_row2.setStyle(TableStyle([
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ]))
+        elements.append(table_row2)
+
+        # Row for Remarks
+        row3 = [[Paragraph(f"<b>Remarks:</b> {admission.remarks}", styles["Normal"])]]
+        table_row3 = Table(row3, colWidths=[500])
+        table_row3.setStyle(TableStyle([
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ]))
+        elements.append(table_row3)
+
+        # Add spacing between admissions
+        elements.append(Spacer(1, 20))
+
+    # Build the PDF
+    doc.build(elements)
+    return response
 
 @login_required(login_url="/login")
 def import_patients(request):

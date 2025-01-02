@@ -22,6 +22,12 @@
         New Case
     </button>
 
+    <button 
+        style='margin-left: 1%;'
+        onclick="window.open('{% url 'generate_patient_pdf' patient.id %}', '_blank');">
+        Generate PDF
+    </button>
+
 </div>
 
 <br>
