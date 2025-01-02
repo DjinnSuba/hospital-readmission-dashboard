@@ -372,6 +372,7 @@ def add_patient_admission(request, pk):
         'form': form,
         'patient': patient,
     })
+
 @login_required
 def edit_admission(request, pk):
     admission = get_object_or_404(Admission, id=pk)
