@@ -135,23 +135,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Fetch the edit form
       fetch(url)
-        .then(response => {
-          console.log('Response Status:', response.status);
-          if (!response.ok) throw new Error('Failed to load the edit form.');
-          return response.text();
-        })
-        .then(html => {
-          console.log('Received HTML:', html);
-          editModalFormContent.innerHTML = html;
-          const form = editModalFormContent.querySelector('form');
-          if (form) form.action = url;
-          addFormSubmissionListener(form);
-          editModal.show();
-        })
-        .catch(error => {
-          console.error('Error loading edit form:', error);
-          editModalFormContent.innerHTML = `<div class="alert alert-danger">${error.message || 'Something went wrong. Please try again later.'}</div>`;
-        });
+  .then(response => {
+    console.log('Response Status:', response.status);
+    return response.text();
+  })
+  .then(html => {
+    console.log('Received HTML:', html);
+    editModalFormContent.innerHTML = html;
+    const form = editModalFormContent.querySelector('form');
+    if (form) form.action = url;
+    addFormSubmissionListener(form);
+    editModal.show();
+  })
+  .catch(error => {
+    console.error('Error loading edit form:', error);
+    editModalFormContent.innerHTML = `<div class="alert alert-danger">${error.message || 'Something went wrong. Please try again later.'}</div>`;
+  });
     });
   });
 

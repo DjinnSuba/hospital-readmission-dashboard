@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
-from .forms import UserRegisterForm, UserLoginForm, AdmissionRecordEntry, PatientRecordEntry, UserEditForm, CSVUploadForm
+from .forms import UserRegisterForm, UserLoginForm, AdmissionRecordEntry, PatientRecordEntry, UserEditForm, CSVUploadForm, PatientEditForm
 from .models import Admission, Patient, Account
 
 import csv
@@ -139,18 +139,23 @@ def edit_user(request, pk):
 
 @login_required(login_url="/login")
 def edit_patient(request, pk):
-    patient = get_object_or_404(Patient, pk=pk)
-    if request.method == "POST":
-        form = PatientRecordEntry(request.POST, instance=patient)
+    print(f"Accessing edit_patient with pk={pk}")
+    try:
+        patient = Patient.objects.get(pk=pk)
+    except Patient.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Patient not found.'}, status=404)
+
+    if request.method == 'POST':
+        form = PatientEditForm(request.POST, instance=patient)
+        print(f"Form Valid: {form.is_valid()} Errors: {form.errors}")
         if form.is_valid():
             form.save()
             return JsonResponse({'success': True, 'message': 'Patient updated successfully!'})
         else:
-            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+            return JsonResponse({'success': False, 'errors': form.errors.get_json_data()}, status=400)
     else:
-        form = PatientRecordEntry(instance=patient)
-    return render(request, 'edit_patient_form.html', {'form': form})
-
+        form = PatientEditForm(instance=patient)
+    return render(request, 'partials/edit_patient_form.html', {'form': form, 'patient': patient})
 
 @login_required(login_url="/login")
 def import_admissions(request):
