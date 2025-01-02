@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Patient List</h1>
+
+<!-- Add Patient Button -->
+<button type="button" class="width: 7vw; font-size: 14px" data-bs-toggle="modal" data-bs-target="#addPatientModal">
+  Add Patient
+</button>
+
+<!-- Modal structure for Add Patient -->
+<div class="modal fade" id="addPatientModal" tabindex="-1" aria-labelledby="addPatientModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addPatientModalLabel">Add Patient</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="modal-patient-form-content">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Table to display the patients -->
+<table class="table table-bordered mt-4">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Name</th>
+      <th>Sex</th>
+      <th>Birthdate</th>
+      <th>Address</th>
+      <th>Contact Number</th>
+      <th>Email</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for patient in patients %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ patient.name }}</td>
+      <td>{{ patient.sex }}</td>
+      <td>{{ patient.birthdate }}</td>
+      <td>{{ patient.address }}</td>
+      <td>{{ patient.contact_number }}</td>
+      <td>{{ patient.email }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Add Patient Modal
+  const patientModal = document.getElementById('addPatientModal');
+  const patientModalFormContent = document.getElementById('modal-patient-form-content');
+
+  patientModal.addEventListener('show.bs.modal', function () {
+    fetch("{% url 'add_patient' %}")
+      .then(response => response.text())
+      .then(html => {
+        patientModalFormContent.innerHTML = html;
+        addPatientFormSubmissionListener();
+      });
+  });
+
+  function addPatientFormSubmissionListener() {
+    const form = document.getElementById('add-patient-form');
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const formData = new FormData(form);
+
+      fetch("{% url 'add_patient' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Patient added successfully!');
+            location.reload();
+          } else {
+            alert('Failed to add patient.');
+          }
+        });
+    });
+  }
+});
+
+</script>
+
+{% endblock %}

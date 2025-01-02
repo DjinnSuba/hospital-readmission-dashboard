@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<div style="width: 83vw; overflow-x: auto; max-height: 70vh; overflow-y: auto; display: flex; align-items: center; flex-wrap: wrap; flex-grow: 1;">
+    <form method="GET" action="" style="display: flex; align-items: center;"> 
+        {% csrf_token %}
+        <label style="font-size: 32px; white-space: nowrap;">Select Patient to Admit</label>
+        <input style="margin-left: 3%;" value="{{ name }}" type="text" class="search-input" name="name" placeholder="Search by name">
+        <input style="margin-left: 1%;" value="{{ diagnosis }}" type="text" class="search-input" name="diagnosis" placeholder="Search by diagnosis">
+
+        <button style="width: 40px; margin-left: 2%; display: flex; justify-content: center;" type="submit">
+            <i class="material-icons" style="font-size: 18px; padding-left: 3px;">search</i>
+        </button>
+    </form>
+    <form method="POST" action="" style="display: flex; align-items: center; margin-left: 4%;">         
+        <button type="button" style="width: 7vw; font-size: 14px;" >
+            Admit New
+        </button>
+    </form>
+</div>
+
+<!-- data-bs-toggle="modal" data-bs-target="#addAdmissionModal" -->
+
+<br>
+
+<div style="width: 83vw; overflow-x: auto; max-height: 70vh; overflow-y: auto;">
+    <table style="border-collapse: collapse; width: 80vw;"> 
+        <thead>
+            <tr>
+                <th style="padding-left: 30px;">Name</th>
+                <th>Sex</th>
+                <th>Address</th>
+                <th>Contact Number</th>
+                <th style="padding-right: 50px;">Email</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for x in patients %}
+            <tr onclick="window.location.href='/admissions/patients/{{ x.id }}/'">
+                <td style="padding-left: 30px;"><em>{{ x.name }}</em></td>
+                <td><em>{{ x.sex }}</em></td>
+                <td><em>{{ x.address }}</em></td>
+                <td><em>{{ x.contact_number }}</em></td>
+                <td style="padding-right: 50px;"><em>{{ x.email }}</em></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+  <!-- Modal structure for Add Admission -->
+  <div class="modal fade" id="addAdmissionModal" tabindex="-1" aria-labelledby="addAdmissionModal" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addAdmissionModal">Add Admission</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="modal-admission-form-content">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Add Admission Modal
+  const admissionModal = document.getElementById('addAdmissionModal');
+  const admissionModalFormContent = document.getElementById('modal-admission-form-content');
+
+  admissionModal.addEventListener('show.bs.modal', function () {
+    fetch("{% url 'add_admission' %}")
+      .then(response => response.text())
+      .then(html => {
+        admissionModalFormContent.innerHTML = html;
+        addAdmissionFormSubmissionListener();
+      });
+  });
+
+  function addAdmissionFormSubmissionListener() {
+    const form = document.getElementById('add-admission-form');
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const formData = new FormData(form);
+
+      fetch("{% url 'add_admission' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Admission added successfully!');
+            location.reload();
+          } else {
+            alert('Failed to add admission.');
+          }
+        });
+    });
+  }
+});
+
+</script>
+{% endblock %}

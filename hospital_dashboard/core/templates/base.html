@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Hospital Admissions Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        img{
+            width: 65px;
+            height: auto;
+            margin-left: 25px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+
+        .navbar {
+            background-color: navy;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1;
+            display: flex;
+        }
+
+        i{
+            color: white;
+            float: right;
+            margin-right: 5px;
+        }
+
+        .sidenav {
+            height: 100vh;
+            width: 250px; 
+            position: fixed; 
+            left: 0;
+            background-color: white; 
+            padding-top: 5%;
+            border: 1px solid navy;
+            padding-left: 25px;
+        }
+
+        .sidenav a {
+            padding: 10px 25px;
+            text-decoration: none;
+            font-size: 16px;
+            color: navy; 
+            display: block;
+        }
+
+        .sidenav a:hover {
+            text-decoration: underline;
+        }
+
+        label{
+            font-size: 20px;
+            font-weight: 600;
+            color: navy;
+        }
+
+        .logout{
+            color: white;
+            background-color: navy;
+            border: none;
+            padding: 10px;
+            border-radius: 20px;
+            width: 180px;
+            bottom: 200px;
+            position: absolute;
+        }
+
+        .footer {
+            background-color: navy; 
+            color: white; 
+            padding: 20px; 
+            text-align: right; 
+            position: fixed; 
+            width: 100%; 
+            bottom: 0; 
+            left: 0;
+            z-index: 1;
+        }
+
+        .table-label{
+            font-size: 16px;
+            font-weight: 100;
+            color: gray;
+        }
+
+        input, select{
+            border-radius: 25px;
+            border: 1px solid lightgray;
+            padding: 10px;
+            padding-left: 15px;
+            width: 100%;
+        }
+
+        table {
+            border-collapse: collapse; 
+            width: 80vw; 
+        }
+
+        table tr {
+            border-top: 1px solid lightgrey; 
+            border-bottom: 1px solid lightgrey; 
+            height: 60px;
+        }
+
+        table td {
+            padding: 12px;
+            width: 100px;
+        } 
+
+        .register-new{
+            margin-top: 50px;
+            margin-left: 20%;
+            width: 15vw;
+            background-color: navy;
+            border: none;
+            border-radius: 20px;
+            padding: 10px;
+            color: white;
+        }
+
+        .register-old{
+            margin-top: 50px;
+            margin-left: 25px;
+            width: 15vw;
+            background-color: navy;
+            border: none;
+            border-radius: 20px;
+            padding: 10px;
+            color: white;
+        }
+        
+        .manage-student{
+            margin-top: 50px;
+            margin-left: 25px;
+            width: 15vw;
+            background-color: navy;
+            border: none;
+            border-radius: 20px;
+            padding: 10px;
+            color: white;
+        }
+
+        .search-input{
+            padding: 10px;
+            margin-left: 25px;
+            width: 12vw;
+            border-radius: 20px;
+            border: 1px solid gray;
+            vertical-align: middle;
+        }
+
+        a{
+            text-decoration: none;
+        }
+
+        .data{
+            color: gray;
+        }
+
+        .register_student{
+            margin-left: 20%;
+            width: 100vw;
+            padding-top: 3%;
+        }
+
+        .labels{
+            width: 160px;
+        }
+
+        .inputs{
+            width: 275px;
+        }
+
+        button {
+            color: white;
+            background-color: navy;
+            border: none;
+            padding: 10px;
+            border-radius: 20px;
+            width: 180px;
+        }
+
+        button:hover{
+            background-color: rgb(1, 1, 82);
+            cursor: pointer;
+        }
+
+        .alert {
+            position: fixed;
+            top: 20%;
+            right: 40%;
+            background-color: #f8d7da;
+            color: #842029;
+            padding: 10px 20px;
+            border: 1px solid #f5c2c7;
+            border-radius: 5px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+        .alert.success { background-color: #d1e7dd; color: #0f5132; border-color: #badbcc; }
+        .alert.info { background-color: #cff4fc; color: #055160; border-color: #b6effb; }
+        .alert button {
+            background: none;
+            border: none;
+            font-size: 16px;
+            margin-left: 20px;
+            color: inherit;
+            cursor: pointer;
+        }
+
+        .table-label{
+            font-weight: 100;
+            font-size: 16px;
+            color: gray;
+        }
+
+        /* table {
+            margin-left: 250px;
+            border-collapse: collapse; 
+            width: 80vw; 
+        } */
+
+        table tr {
+            border-top: 1px solid lightgrey; 
+            border-bottom: 1px solid lightgrey; 
+        }
+
+        tbody tr:hover {
+            background-color: lightgrey !important;
+        }
+
+
+        table td {
+            padding: 12px;
+            text-align: center;
+        } 
+
+        table thead {
+            background-color: white !important; 
+            font-weight: bold;
+            text-align: center !important;
+        }
+
+        .sortable td {
+            padding: 12px;
+            margin: -10px;
+            background-color: white !important;
+            text-align: center !important;
+            color: navy;
+        }
+
+        .sortable th {
+            background-color: white !important; 
+            font-weight: bold !important;
+            text-align: center !important;
+            color: navy !important;
+        } 
+
+        .sortable tr:hover {
+            background-color: lightgrey !important;
+        }
+
+        .data {
+            color: gray;
+        }
+
+        
+    </style>
+
+    <script>
+        // Function to display an alert with the message content
+        function showAlert(message, tag) {
+            const alertBox = document.createElement('div');
+            alertBox.className = `alert ${tag}`;
+            alertBox.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()">✖</button>
+            `;
+            document.body.appendChild(alertBox);
+            setTimeout(() => alertBox.remove(), 5000);
+        }
+    </script>
+
+    <link href="https://cdn.jsdelivr.net/gh/tofsjonas/sortable@latest/sortable.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/gh/tofsjonas/sortable@latest/sortable.min.js"></script>
+</head>
+<body>
+    {% if messages %}
+        {% for message in messages %}
+        <script>
+        showAlert("{{ message|escapejs }}", "{{ message.tags }}");
+        </script>
+        {% endfor %}
+    {% endif %}
+
+    <div class="navbar"> 
+        <div style="color: white; margin-left: 1%; ">
+            <h1 style="font-family: 'Times New Roman', Times, serif; font-size: 24px; margin-top: 12px;">Hospital Admission Dashboard</h1>
+        </div>        
+        <div style="color: white; float: right; margin-top: 0.5%; margin-right: 40px; display: flex; align-items: center;">
+            <i class="w3-xxlarge material-icons">person</i>
+            <p style="font-size: small; margin: 0 0 0 8px;">{{ request.user.username }}</p>
+        </div>
+    </div>    
+    <br>
+    <br>    
+    <div class="sidenav">
+
+        {% if request.user.role == 'Admin' %}
+        <label class="sidenav-label">Admin</label>
+        <a href="{% url 'admin_dashboard' %}">Dashboard</a>
+        <a a href="{% url 'user_list' %}">Users</a>
+        <a href="{% url 'patient_list' %}">Patients</a>
+
+        {% elif request.user.role == 'Clinician' %}
+
+        <label class="sidenav-label">Clinician</label>
+        <a href="{% url 'clinician_dashboard' %}">Dashboard</a> 
+        <a href="{% url 'admissions' %}">Admissions</a>
+
+        {% elif request.user.role == 'Analyst' %}
+
+        <label class="sidenav-label">Analyst</label>
+        <a href="{% url 'admin_dashboard' %}">Dashboard</a>
+    
+
+        {% endif %}
+
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button class="logout" type="submit">Log Out</button>
+        </form>        
+    </div>
+
+    <div class="container" style="padding-top: 5%; padding-left: 5%;">
+        {% block content %}
+        <!-- Content from child templates will go here -->
+        {% endblock %}
+    </div>
+
+    <div class="footer">
+        2024
+    </div>
+</body>
+</html>
