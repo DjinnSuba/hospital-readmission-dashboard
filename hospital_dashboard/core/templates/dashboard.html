@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h1></h1>
-
 <div style="width: 75vw; overflow-x: auto; max-height: 70vh; overflow-y: auto; display: flex; align-items: center; flex-wrap: wrap; flex-grow: 1;">
     <form method="GET" action="{% url 'dashboard' %}" style="display: flex; align-items: center;"> 
         {% csrf_token %}
@@ -13,12 +11,16 @@
         <button style="width: 40px; margin-left: 2%; display: flex; justify-content: center;" type="submit">
             <i class="material-icons" style="font-size: 18px; padding-left: 3px;">search</i>
         </button>
-    </form>        
+    </form> 
+    <form method="GET" action="{% url 'dashboard' %}" style="display: flex; align-items: center; margin-left: 4%;"> 
+        {% csrf_token %}
+        <button style="width: 12vw; margin-left: 2%; display: flex; justify-content: center;" name="action" value="download" type="submit">Download Admissions</button>
+    </form>    
 </div>
 
 <br>
 
-<div style="display: flex; flex-direction: column; overflow-y: auto; max-height: 65vh;">
+<div style="width: 75vw; display: flex; flex-direction: column; overflow-y: auto; max-height: 65vh;">
     <div style="display: flex; justify-content: space-between;">
         <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
             <div style="flex: 0 0 48%; display: flex;  align-items: center; padding: 10px; background-color: #f0f0f0; margin: 10px;">
@@ -82,12 +84,27 @@
                             size: 14,
                         }
                     }
-                }
+                },
+                datalabels: {
+                    formatter: (value, context) => {
+                        const total = context.chart.data.datasets[0].data.reduce((sum, val) => sum + val, 0);
+                        const percentage = ((value / total) * 100).toFixed(1) + '%';
+                        return percentage;
+                    },
+                    color: '#000', // Text color
+                    font: {
+                        size: 12,
+                        weight: 'bold',
+                    },
+                    anchor: 'center', // Position of labels
+                    align: 'center',
+                },
             },
             layout: {
                 padding: 20
             }
-        }
+        },
+        plugins: [ChartDataLabels] 
     });
 </script>
 
@@ -126,12 +143,27 @@
                             size: 14,
                         }
                     }
-                }
+                },
+                datalabels: {
+                    formatter: (value, context) => {
+                        const total = context.chart.data.datasets[0].data.reduce((sum, val) => sum + val, 0);
+                        const percentage = ((value / total) * 100).toFixed(1) + '%';
+                        return percentage;
+                    },
+                    color: '#000', // Text color
+                    font: {
+                        size: 12,
+                        weight: 'bold',
+                    },
+                    anchor: 'center', // Position of labels
+                    align: 'center',
+                },
             },
             layout: {
                 padding: 20
             }
-        }
+        },
+        plugins: [ChartDataLabels]
     });
 </script>
 
@@ -192,6 +224,7 @@
     });
 </script>
 
+<!-- disease bar chart -->
 <script>
     const commonDiseases_labels = {{ commonDiseases_labels|safe }};
     const commonDiseases_data = {{ commonDiseases_data|safe }};
@@ -238,6 +271,7 @@
     });
 </script>
 
+<!-- treatment bar chart -->
 <script>
     const commonTreatments_labels = {{ commonTreatments_labels|safe }};
     const commonTreatments_data = {{ commonTreatments_data|safe }};

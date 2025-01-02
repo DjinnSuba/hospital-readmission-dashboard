@@ -1,9 +1,10 @@
+import csv
 from datetime import date, datetime
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.db.models import Count
 from django.db.models.functions import TruncMonth
@@ -35,6 +36,41 @@ def login_view(request):
     else:
         form = UserLoginForm() 
     return render(request, 'login.html', {'form': form})
+
+def download_data(user, admissions):
+    filename = user.name.replace(' ', '_') + '-' + str(date.today())
+    
+    response = HttpResponse(content_type='text/csv')  
+    response['Content-Disposition'] = 'attachment; filename=' + filename + '.csv'  
+    writer = csv.writer(response)  
+
+    writer.writerow([
+        'Patient Name', 
+        'Patient Email', 
+        'Clinician Name', 
+        'Clinician Email', 
+        'Is Readmission', 
+        'Diagnosis', 
+        'Treatment', 
+        'Date', 
+        'Remarks'
+    ])
+
+    # Write data rows
+    for admission in admissions:
+        writer.writerow([
+            admission.patient.name,          # Patient name
+            admission.patient.email,         # Patient email
+            admission.clinician.name,        # Clinician name
+            admission.clinician.email,       # Clinician email
+            'Yes' if admission.is_readmission else 'No',  # Is readmission
+            admission.diagnosis,             # Diagnosis
+            admission.treatment,             # Treatment
+            admission.date,                  # Date
+            admission.remarks or ''          # Remarks (handles null)
+        ])
+
+    return response  
 
 @login_required(login_url="/login")
 def dashboard(request):
@@ -71,6 +107,10 @@ def dashboard(request):
 
     context['before'] = before
     context['after'] = after  
+
+    action = request.GET.get('action')
+    if action == "download":
+        return download_data(user, admissions)
 
     admissions_by_sex = admissions.values('patient__sex').annotate(count=Count('id')).order_by('patient__sex')
     context['sex_labels'] = [entry['patient__sex'] for entry in admissions_by_sex]
