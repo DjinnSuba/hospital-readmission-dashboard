@@ -6,12 +6,28 @@
 </div>
 
 <br>
-<div>
-    <label>Download Template</label>
-    <a href="{% url 'download_admission_csv_template' %}">
-        <button type="button">CSV Template</button>
-    </a>
-</div>
+<div style="display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;">
+    <!-- Download Admissions Form -->
+    <form method="GET" action="{% url 'dashboard' %}" style="margin: 0;">
+      {% csrf_token %}
+      <button 
+        style="width: 12vw; display: flex; justify-content: center; font-size: 14px;" 
+        name="action" 
+        value="download" 
+        type="submit"
+      >
+        Download Admissions
+      </button>
+    </form>
+  
+    <!-- Download Template -->
+    <div style="display: flex; align-items: center;">
+      <a href="{% url 'download_admission_csv_template' %}">
+        <button type="button" style="font-size: 14px;">Download CSV Template</button>
+      </a>
+    </div>
+  </div>
+  
 
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}

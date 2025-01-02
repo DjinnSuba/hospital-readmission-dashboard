@@ -74,6 +74,32 @@ def download_data(user, admissions):
 
     return response  
 
+def download_patients_data(user, patients):
+    filename = user.name.replace(' ', '_') + '-' + str(date.today())
+    
+    response = HttpResponse(content_type='text/csv')  
+    response['Content-Disposition'] = 'attachment; filename=' + filename + '.csv'  
+    writer = csv.writer(response)  
+    writer.writerow([
+        'name', 
+        'sex', 
+        'birthdate', 
+        'address', 
+        'contact_number', 
+        'email'])
+
+    # Write data rows
+    for patient in patients:
+        writer.writerow([
+            patient.name,          # Patient name
+            patient.sex,         # Patient email
+            patient.birthdate,        # Clinician name
+            patient.contact_number,
+            patient.email
+        ])
+
+    return response  
+
 @login_required(login_url="/login")
 def dashboard(request):
     context={}
@@ -199,6 +225,11 @@ def sign_out(request):
 @login_required(login_url="/login")
 def patient_list(request):
     patients = Patient.objects.all()  # Retrieve all patients
+    user_id = request.user.id
+    user = Account.objects.get(id=user_id)
+    action = request.GET.get('action')
+    if action == "download":
+        return download_patients_data(user, patients)
     return render(request, 'patient_list.html', {'patients': patients})
 
 @login_required(login_url="/login")
@@ -565,7 +596,7 @@ def download_admission_csv_template(request):
 
     # Define the CSV structure
     writer = csv.writer(response)
-    writer.writerow(['clinician_username', 'patient_email', 'is_readmission', 'diagnosis' 'treatment', 'Date', 'remarks'])
+    writer.writerow(['clinician_username', 'patient_email', 'is_readmission', 'diagnosis', 'treatment', 'date', 'remarks'])
     writer.writerow(['Dr. Username', 'patient@email.com', 'True','Flu', 'Rest and hydration', '2024-01-01', 'first readmission'])
 
     return response
