@@ -366,6 +366,8 @@
         <a a href="{% url 'user_list' %}">Users</a>
         <a href="{% url 'patient_list' %}">Patients</a>
         <a href="{% url 'import_admissions' %}">Import Admissions</a>
+        <a href="{% url 'import_patients' %}">Import Patients</a>
+        <a href="{% url 'import_users' %}">Import Users</a>
 
         {% elif request.user.role == 'Clinician' %}
 

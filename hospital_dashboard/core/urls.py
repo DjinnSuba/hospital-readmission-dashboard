@@ -27,4 +27,8 @@ urlpatterns = [
     path('import-admissions/', views.import_admissions, name='import_admissions'),
     path('import-patients/', views.import_patients, name='import_patients'),
     path('import-users/', views.import_users, name='import_users'),
+
+    path('download-admission-template/', views.download_admission_csv_template, name='download_admission_csv_template'),
+    path('download-patient-template/', views.download_patient_csv_template, name='download_patient_csv_template'),
+    path('download-account-template/', views.download_account_csv_template, name='download_account_csv_template'),
 ]
