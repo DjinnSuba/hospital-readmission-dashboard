@@ -32,4 +32,7 @@ urlpatterns = [
     path('import-users/', views.import_users, name='import_users'),
 
     path('generate-pdf/<int:patient_id>/', views.generate_patient_pdf, name='generate_patient_pdf'),
+    path('download-admission-template/', views.download_admission_csv_template, name='download_admission_csv_template'),
+    path('download-patient-template/', views.download_patient_csv_template, name='download_patient_csv_template'),
+    path('download-account-template/', views.download_account_csv_template, name='download_account_csv_template'),
 ]
