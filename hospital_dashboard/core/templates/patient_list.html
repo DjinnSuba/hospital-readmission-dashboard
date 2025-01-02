@@ -3,13 +3,30 @@
 {% block content %}
 <h1>Patient List</h1>
 
-<!-- Add Patient Button -->
-<button type="button" style="width: 7vw; font-size: 14px" data-bs-toggle="modal" data-bs-target="#addPatientModal">
-  Add Patient
-</button>
-<button type="button" style="width: 7vw; font-size: 14px" data-bs-toggle="modal" data-bs-target="#importPatientModal">
-  Import CSV
-</button>
+<div style="display: flex; gap: 1rem; align-items: center;">
+  <!-- Add Patient Button -->
+  <button type="button" style="width: 7vw; font-size: 14px;" data-bs-toggle="modal" data-bs-target="#addPatientModal">
+    Add Patient
+  </button>
+
+  <!-- Import CSV Button -->
+  <button type="button" style="width: 7vw; font-size: 14px;" data-bs-toggle="modal" data-bs-target="#importPatientModal">
+    Import CSV
+  </button>
+
+  <!-- Download Patients Button -->
+  <form method="GET" action="{% url 'patient_list' %}" style="margin: 0;">
+    {% csrf_token %}
+    <button 
+      style="width: 12vw; font-size: 14px; display: flex; justify-content: center;" 
+      name="action" 
+      value="download" 
+      type="submit"
+    >
+      Download Patients
+    </button>
+  </form>
+</div>
 
 <!-- Modal structure for Add Patient -->
 <div class="modal fade" id="addPatientModal" tabindex="-1" aria-labelledby="addPatientModalLabel" aria-hidden="true">

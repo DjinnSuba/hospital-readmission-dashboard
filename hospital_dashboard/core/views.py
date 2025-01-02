@@ -47,29 +47,51 @@ def download_data(user, admissions):
     writer = csv.writer(response)  
 
     writer.writerow([
-        'Patient Name', 
-        'Patient Email', 
-        'Clinician Name', 
-        'Clinician Email', 
-        'Is Readmission', 
-        'Diagnosis', 
-        'Treatment', 
-        'Date', 
-        'Remarks'
+        "clinician_username",
+        "patient_email",
+        "is_readmission",
+        "diagnosis",
+        "treatment",
+        "date",
+        "remarks"
     ])
 
     # Write data rows
     for admission in admissions:
         writer.writerow([
-            admission.patient.name,          # Patient name
+            admission.clinician.username,        # Clinician name
             admission.patient.email,         # Patient email
-            admission.clinician.name,        # Clinician name
-            admission.clinician.email,       # Clinician email
-            'Yes' if admission.is_readmission else 'No',  # Is readmission
+            'True' if admission.is_readmission else 'False',  # Is readmission
             admission.diagnosis,             # Diagnosis
             admission.treatment,             # Treatment
             admission.date,                  # Date
             admission.remarks or ''          # Remarks (handles null)
+        ])
+
+    return response  
+
+def download_patients_data(user, patients):
+    filename = user.name.replace(' ', '_') + '-' + str(date.today())
+    
+    response = HttpResponse(content_type='text/csv')  
+    response['Content-Disposition'] = 'attachment; filename=' + filename + '.csv'  
+    writer = csv.writer(response)  
+    writer.writerow([
+        'name', 
+        'sex', 
+        'birthdate', 
+        'address', 
+        'contact_number', 
+        'email'])
+
+    # Write data rows
+    for patient in patients:
+        writer.writerow([
+            patient.name,          # Patient name
+            patient.sex,         # Patient email
+            patient.birthdate,        # Clinician name
+            patient.contact_number,
+            patient.email
         ])
 
     return response  
@@ -199,6 +221,11 @@ def sign_out(request):
 @login_required(login_url="/login")
 def patient_list(request):
     patients = Patient.objects.all()  # Retrieve all patients
+    user_id = request.user.id
+    user = Account.objects.get(id=user_id)
+    action = request.GET.get('action')
+    if action == "download":
+        return download_patients_data(user, patients)
     return render(request, 'patient_list.html', {'patients': patients})
 
 @login_required(login_url="/login")
@@ -432,8 +459,8 @@ def import_admissions(request):
                             patient=patient,
                             is_readmission=bool(row["is_readmission"]),
                             diagnosis=row["diagnosis"],
-                            treatment=row["treatment"],
-                            date=row["date"],
+                            treatment=row.get("treatment", ""),
+                            date=row.get("date", ""),
                             remarks=row.get("remarks", ""),
                         )
                         records_created += 1
@@ -528,7 +555,8 @@ def import_patients(request):
             messages.error(request, "Invalid form submission. Please try again.")
     else:
         form = CSVUploadForm()
-    return render(request, "partials/import_patient_form.html", {"form": form})
+    patients = Patient.objects.all()
+    return render(request, "partials/import_patient_form.html", {"form": form, "patients": patients})
 
 
 @login_required(login_url="/login")
@@ -630,3 +658,41 @@ def manage_admissions(request):
     context['after'] = after        
     context['admissions'] = admissions.order_by('-date')  # Retrieve all patients
     return render(request, 'manage_admissions.html', context)
+    accounts = Account.objects.all()
+    return render(request, "partials/import_user_form.html", {"form": form, "accounts": accounts})
+
+def download_admission_csv_template(request):
+    # Create a response object with the appropriate header for a CSV file
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="admissions_template.csv"'
+
+    # Define the CSV structure
+    writer = csv.writer(response)
+    writer.writerow(['clinician_username', 'patient_email', 'is_readmission', 'diagnosis', 'treatment', 'date', 'remarks'])
+    writer.writerow(['Dr. Username', 'patient@email.com', 'True','Flu', 'Rest and hydration', '2024-01-01', 'first readmission'])
+
+    return response
+
+def download_patient_csv_template(request):
+    # Create a response object with the appropriate header for a CSV file
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="patient_template.csv"'
+
+    # Define the CSV structure
+    writer = csv.writer(response)
+    writer.writerow(['name', 'sex', 'birthdate', 'address', 'contact_number', 'email'])
+    writer.writerow(['Eleanor Rigby', 'F', '1970-03-12', '12 Penny Lane, Liverpool', '1112223333', 'eleanor.rigby@example.com'])
+
+    return response
+
+def download_account_csv_template(request):
+    # Create a response object with the appropriate header for a CSV file
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="users_template.csv"'
+
+    # Define the CSV structure
+    writer = csv.writer(response)
+    writer.writerow(['username', 'name', 'email',  'password', 'role'])
+    writer.writerow(['jdoe', 'Jane Doe', 'john.doe@example.com', 'password123', 'Admin'])
+
+    return response
